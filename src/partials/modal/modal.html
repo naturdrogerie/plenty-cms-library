@@ -1,0 +1,14 @@
+<div class="reveal-modal medium" data-reveal aria-labelledby="modalTitle{{uid}}" aria-hidden="true" role="dialog">
+    {{#title}}
+    <h2 id="modalTitle{{uid}}">{{{title}}}</h2>
+    {{/title}}
+
+    {{{content}}}
+
+    {{#labelDismiss}}
+    <button type="button" class="button secondary close-reveal-modal">{{labelDismiss}}</button>
+    {{/labelDismiss}}
+
+    <button type="button" class="button close-reveal-modal" data-plenty-modal="confirm">{{labelConfirm}}</button>
+    <a class="close-reveal-modal" aria-label="Close">&#215;</a>
+</div>

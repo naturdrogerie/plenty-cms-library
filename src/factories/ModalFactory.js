@@ -31,7 +31,7 @@
          * @returns {boolean}
          */
         function isModal( html ) {
-            return $(html).filter('.reveal-modal' ).length + $(html).find('.reveal-modal' ).length > 0;
+            return PlentyFramework.partials.Modal.isModal( html );
         }
 
         /**
@@ -53,6 +53,14 @@
         function Modal() {
 
             var modal = this;
+						/**
+             * The UID of the modal
+             * @attribute uid
+             * @type {string}
+             * @private
+             * @default ""
+             */
+            modal.title      = '';
             /**
              * The title of the modal
              * @attribute title
@@ -125,6 +133,12 @@
              * @default -1
              */
             modal.timeout = -1;
+
+            modal.hide = hide;
+            modal.startTimeout = startTimeout;
+            modal.stopTimeout = stopTimeout;
+            modal.pauseTimeout = pauseTimeout;
+            modal.continueTimeout = continueTimeout;
 
             var bsModal;
             var timeout, interval;
@@ -242,12 +256,10 @@
              */
             function show() {
                 if( isModal( modal.content ) ) {
-                    bsModal = $(modal.content);
-                    if( bsModal.length > 1 || !bsModal.is('.reveal-modal') ) {
-                        bsModal = $(modal.content).filter('.reveal-modal') || $(modal.content).find('.reveal-modal');
-                    }
+                    bsModal = PlentyFramework.partials.Modal.getModal( modal.content );
                 } else {
-                    bsModal = $( buildTemplate() );
+										modal.uid = '_' + Math.random().toString(36).substr(2, 9);
+                    bsModal = $( PlentyFramework.compileTemplate('modal/modal.html', modal) );
                 }
 
                 $(modal.container).append( bsModal );
@@ -264,64 +276,17 @@
                 }
 
                 // bind callback functions
-								bsModal.on('closed.fndtn.reveal', '[data-reveal]', function () {
-                    hide();
-                });
+                PlentyFramework.partials.Modal.init( bsModal, modal );
                 bsModal.find('[data-plenty-modal="confirm"]').click( function() {
                     var close = modal.onConfirm();
                     if( close ) hide(true);
                 });
 
-                bsModal.foundation('reveal', 'open');
-
-                bsModal.on('closed.fndtn.reveal', '[data-reveal]', function () {
-                    bsModal.remove();
-                });
+                PlentyFramework.partials.Modal.show( bsModal );
 
                 if( modal.timeout > 0 ) {
                     startTimeout();
-                    bsModal.on('close.fndtn.reveal', '[data-reveal]', stopTimeout);
-                    bsModal.hover(pauseTimeout, function() {
-                        if( bsModal.is('.open') )
-                        {
-                            continueTimeout();
-                        }
-                    });
                 }
-
-            }
-
-            /**
-             * Wrap html content in bootstrap styled modal.
-             * @function buildTemplate
-             * @private
-             * @returns {string}
-             */
-            function buildTemplate() {
-							  // generate UID to create a unique ID for the modal title
-								var uid = '_' + Math.random().toString(36).substr(2, 9);
-
-                var template = '<div class="reveal-modal medium" data-reveal aria-labelledby="modalTitle+' + uid + '" aria-hidden="true" role="dialog">';
-
-                if( !!modal.title && modal.title.length > 0 ) {
-                    template +=             '<h2 id="modalTitle+' + uid + '">' + modal.title + '</h2>';
-                }
-
-                template +=                 modal.content;
-
-                if( !!modal.labelDismiss && modal.labelDismiss.length > 0 ) {
-                    template +=                '<button type="button" class="button secondary close-reveal-modal"> \
-                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>' + modal.labelDismiss + '  \
-                                                </button>';
-                }
-
-                template +=                    '<button type="button" class="button close-reveal-modal" data-plenty-modal="confirm"> \
-                                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> ' + modal.labelConfirm + ' \
-                                                </button> \
-																								<a class="close-reveal-modal" aria-label="Close">&#215;</a> \
-                                            </div>';
-
-                return template;
             }
 
             /**
@@ -330,8 +295,7 @@
              * @param {boolean} confirmed Flag indicating of modal is closed by confirmation button or dismissed
              */
             function hide( confirmed ) {
-							  $('#second-modal').foundation('reveal', 'close');
-                bsModal.modal('hide');
+                PlentyFramework.partials.Modal.hide( bsModal );
 
                 if( !confirmed ) {
                     modal.onDismiss();
