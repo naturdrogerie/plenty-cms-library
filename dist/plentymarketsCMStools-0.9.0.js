@@ -777,7 +777,7 @@
          * @returns {boolean}
          */
         function isModal( html ) {
-            return $(html).filter('.modal' ).length + $(html).find('.modal' ).length > 0;
+            return $(html).filter('.reveal-modal' ).length + $(html).find('.reveal-modal' ).length > 0;
         }
 
         /**
@@ -989,8 +989,8 @@
             function show() {
                 if( isModal( modal.content ) ) {
                     bsModal = $(modal.content);
-                    if( bsModal.length > 1 || !bsModal.is('.modal') ) {
-                        bsModal = $(modal.content).filter('.modal') || $(modal.content).find('.modal');
+                    if( bsModal.length > 1 || !bsModal.is('.reveal-modal') ) {
+                        bsModal = $(modal.content).filter('.reveal-modal') || $(modal.content).find('.reveal-modal');
                     }
                 } else {
                     bsModal = $( buildTemplate() );
@@ -1010,7 +1010,7 @@
                 }
 
                 // bind callback functions
-                bsModal.on('hidden.bs.modal', function() {
+								bsModal.on('closed.fndtn.reveal', '[data-reveal]', function () {
                     hide();
                 });
                 bsModal.find('[data-plenty-modal="confirm"]').click( function() {
@@ -1018,17 +1018,17 @@
                     if( close ) hide(true);
                 });
 
-                bsModal.modal('show');
+                bsModal.foundation('reveal', 'open');
 
-                bsModal.on('hidden.bs.modal', function() {
+                bsModal.on('closed.fndtn.reveal', '[data-reveal]', function () {
                     bsModal.remove();
                 });
 
                 if( modal.timeout > 0 ) {
                     startTimeout();
-                    bsModal.on('hide.bs.modal', stopTimeout);
-                    bsModal.find('.modal-content').hover(pauseTimeout, function() {
-                        if( bsModal.is('.in') )
+                    bsModal.on('close.fndtn.reveal', '[data-reveal]', stopTimeout);
+                    bsModal.hover(pauseTimeout, function() {
+                        if( bsModal.is('.open') )
                         {
                             continueTimeout();
                         }
@@ -1044,34 +1044,28 @@
              * @returns {string}
              */
             function buildTemplate() {
+							  // generate UID to create a unique ID for the modal title
+								var uid = '_' + Math.random().toString(36).substr(2, 9);
 
-                var template = '<div class="modal fade"> \
-                                    <div class="modal-dialog"> \
-                                        <div class="modal-content">';
+                var template = '<div class="reveal-modal medium" data-reveal aria-labelledby="modalTitle+' + uid + '" aria-hidden="true" role="dialog">';
 
                 if( !!modal.title && modal.title.length > 0 ) {
-                    template +=             '<div class="modal-header"> \
-                                                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> \
-                                                <h4 class="modal-title">' + modal.title + '</h4> \
-                                            </div>';
+                    template +=             '<h2 id="modalTitle+' + uid + '">' + modal.title + '</h2>';
                 }
 
-                template +=                 '<div class="modal-body">' + modal.content + '</div> \
-                                             <div class="modal-footer">';
+                template +=                 modal.content;
 
                 if( !!modal.labelDismiss && modal.labelDismiss.length > 0 ) {
-                    template +=                '<button type="button" class="btn btn-default" data-dismiss="modal"> \
+                    template +=                '<button type="button" class="button secondary close-reveal-modal"> \
                                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>' + modal.labelDismiss + '  \
                                                 </button>';
                 }
 
-                template +=                    '<button type="button" class="btn btn-primary" data-dismiss="modal" data-plenty-modal="confirm"> \
+                template +=                    '<button type="button" class="button close-reveal-modal" data-plenty-modal="confirm"> \
                                                     <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> ' + modal.labelConfirm + ' \
                                                 </button> \
-                                            </div> \
-                                        </div> \
-                                    </div> \
-                                </div>';
+																								<a class="close-reveal-modal" aria-label="Close">&#215;</a> \
+                                            </div>';
 
                 return template;
             }
@@ -1082,6 +1076,7 @@
              * @param {boolean} confirmed Flag indicating of modal is closed by confirmation button or dismissed
              */
             function hide( confirmed ) {
+							  $('#second-modal').foundation('reveal', 'close');
                 bsModal.modal('hide');
 
                 if( !confirmed ) {
@@ -1155,6 +1150,7 @@
 
 	});
 }(jQuery, PlentyFramework));
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
@@ -1498,6 +1494,7 @@
          * Add item to basket. Will fail and show a popup if item has order params
          * @function addBasketItem
          * @param   {Array}     article         Array containing the item to add
+         * @param   {boolean}   [isUpdate=false]      Indicating if item's OrderParams are updated
          * @return {object} <a href="http://api.jquery.com/category/deferred-object/" target="_blank">jQuery deferred
          *     Object</a>
          */
@@ -1537,7 +1534,7 @@
         function saveOrderParams( articleWithParams ) {
             var orderParamsForm = $('[data-plenty-checkout-form="OrderParamsForm"]');
 
-            //TODO use $("[data-plenty-checkout-form='OrderParamsForm']").serializeArray(); to get order params
+            //TODO use $("[data-plenty-checkout-form='OrderParamsForm']").serializeArray() to get order params
             //Groups
             orderParamsForm.find('[name^="ParamGroup"]').each(function(){
                 var match = this.name.match(/^ParamGroup\[(\d+)]\[(\d+)]$/);
@@ -3685,63 +3682,6 @@
             });
         });
 
-    });
-
-}(jQuery, PlentyFramework));
-/**
- * Licensed under AGPL v3
- * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
- * =====================================================================================
- * @copyright   Copyright (c) 2015, plentymarkets GmbH (http://www.plentymarkets.com)
- * @author      mlauterbach <maximilian.lauterbach@plentymarkets.com>
- * =====================================================================================
- */
-
-/**
- * Directive to slide threw producer images.
- * Uses placeholder $ProducerImageList to load producer images and add slider identifier class to it.
- *
- * $ProducerImageList removes markup like this:
- *    <div class="PlentyItemProducerContainer">
- *        <ul class="PlentyItemProducerList">
- *          <li class="PlentyItemProducerListItem Producer_2">
- *              <a href="http://master.plentymarkets.com/?ActionCall=WebActionArticleSearch&amp;Params%5Bproducer%5D=2"
- * title="A &amp; C Design">
- *                  <img
- * src="https://owncloud.org/wp-content/themes/owncloudorgnew/assets/img/providers/datacenter.png"
- * class="PlentyItemProducerListItemImage Producer_2" title="A &amp; C Design" alt="A &amp; C Design">
- *              </a>
- *          </li>
- *          <li class="PlentyItemProducerListItem Producer_1">
- *              <a href="http://master.plentymarkets.com/?ActionCall=WebActionArticleSearch&amp;Params%5Bproducer%5D=1"
- * title="Exclusive Leather">
- *                  <img src="https://owncloud.org/wp-content/themes/owncloudorgnew/assets/img/providers/enavn.png"
- * class="PlentyItemProducerListItemImage Producer_1" title="Exclusive Leather" alt="Exclusive Leather">
- *              </a>
- *          </li>
- *        </ul>
- *    </div>
- */
-
-(function($, pm) {
-    pm.directive('[data-plenty="producerImageSlider"]', function(i, elem) {
-        // Um korrekt durch die Herstellerlogos zu navigieren, muss das Listenelement (ul) selektiert werden.
-        var imageList = $(elem).find(".PlentyItemProducerList");
-        imageList.addClass("list-unstyled");
-
-        /*
-         *  Die Einstellungen für den owlCarousel-Slider wurden zum Großteil aus dem schon im plentymarketsCMSTools
-         *  vorhandenen contentPage-Slider übernommen und können individuell angepasst werden.
-         */
-        imageList.owlCarousel({
-                navigation: true,       // Anzeige der Navigationspfeile
-                navigationText: false,  // Anzeige der Titel der Navigationspfeile
-                slideSpeed: 1000,       // Geschwindigkeit der Wischbewegung
-                paginationSpeed: 1000,  // Geschwindigkeit der
-                singleItem: false,
-                autoPlay: 6000,
-                stopOnHover: true
-            });
     });
 
 }(jQuery, PlentyFramework));

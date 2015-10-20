@@ -44,7 +44,7 @@ module.exports = function(grunt) {
 
         uglify: {
             options: {
-                banner:  '/**\n * Licensed under AGPL v3\n * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)\n * =====================================================================================\n * @copyright   Copyright (c) 2015, plentymarkets GmbH (http://www.plentymarkets.com)\n * @author      Felix Dausch <felix.dausch@plentymarkets.com>\n * =====================================================================================\n*/'
+                banner:  '/**\n * Licensed under AGPL v3\n * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)\n * =====================================================================================\n * @copyright   Copyright (c) 2015, plentymarkets GmbH (http://www.plentymarkets.com)\n * Changes made by Die Naturdrogerie (https://www.naturdrogerie.de)\n * @author      Felix Dausch <felix.dausch@plentymarkets.com>\n * @author      Uwe Schürmann <uwe@naturdrogerie.de>\n * =====================================================================================\n*/'
             },
             build: {
                 src: 'debug/<%= pkg.name %>-<%= pkg.version %>.js',
