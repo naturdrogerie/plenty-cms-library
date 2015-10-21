@@ -3,13 +3,15 @@
     pm.partials.Modal = {
         init: function ( element, modal ) {
             element.on('closed.fndtn.reveal', '[data-reveal]', function () {
-                hide();
+                modal.hide();
             });
 
             if( modal.timeout > 0 ) {
                 startTimeout();
-                element.on('close.fndtn.reveal', '[data-reveal]', stopTimeout);
+                element.on('close.fndtn.reveal', '[data-reveal]', modal.stopTimeout);
                 element.hover(modal.pauseTimeout, function() {
+                    modal.pauseTimeout();
+                }, function () {
                     if( element.is('.open') )
                     {
                         modal.continueTimeout();

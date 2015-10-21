@@ -28,8 +28,7 @@
          */
         var waitScreenCount = 0;
         var waitScreen;
-        var errorPopup;
-
+        var errorPopup = null;
         return {
             throwError: throwError,
             printErrors: printErrors,
@@ -57,7 +56,7 @@
         function printErrors(errorMessages) {
 
             // create error-popup if not exist
-            if( !errorPopup ) {
+            if( !errorPopup || $('body').has(errorPopup ).length <= 0 ) {
                 errorPopup = $( pm.compileTemplate('error/errorPopup.html') );
                 $('body').append( errorPopup );
                 pm.partials.Error.init( errorPopup );
@@ -83,7 +82,7 @@
             waitScreenCount = waitScreenCount || 0;
 
             // create wait-overlay if not exist
-            if( !waitScreen ) {
+            if( !waitScreen || $('body').has(waitScreen ).length <= 0 ) {
                 waitScreen = $( pm.compileTemplate('waitscreen/waitscreen.html') );
                 pm.partials.WaitScreen.init( waitScreen );
             }

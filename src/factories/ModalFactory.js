@@ -258,7 +258,10 @@
                 if( isModal( modal.content ) ) {
                     bsModal = PlentyFramework.partials.Modal.getModal( modal.content );
                 } else {
+<<<<<<< HEAD
 										modal.uid = '_' + Math.random().toString(36).substr(2, 9);
+=======
+>>>>>>> plentymarkets/plenty_dev
                     bsModal = $( PlentyFramework.compileTemplate('modal/modal.html', modal) );
                 }
 
@@ -287,6 +290,10 @@
                 if( modal.timeout > 0 ) {
                     startTimeout();
                 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> plentymarkets/plenty_dev
             }
 
             /**
