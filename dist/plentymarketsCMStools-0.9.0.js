@@ -2879,6 +2879,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
     });
 
 }(jQuery, PlentyFramework));
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
@@ -3644,13 +3645,14 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
     $(document).ready(function() {
 
-        if ( pm.getInstance().MediaSizeService.interval() != 'xs' && pm.getInstance().MediaSizeService.interval() != 'sm' && Modernizr.touch ) {
-            $('.dropdown.open > a[data-plenty-enable="touch"]').parent().removeClass('open');
-        }
+        // if ( pm.getInstance().MediaSizeService.interval() != 'xs' && pm.getInstance().MediaSizeService.interval() != 'sm' && Modernizr.touch ) {
+        //     $('.dropdown.open > a[data-plenty-enable="touch"]').parent().removeClass('open');
+        // }
 
     });
 
 }(jQuery, PlentyFramework));
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
@@ -4132,6 +4134,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
     }, ['MediaSizeService']);
 
 }(jQuery, PlentyFramework));
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)

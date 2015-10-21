@@ -6,12 +6,6 @@
                 hide();
             });
 
-            bsModal.foundation('reveal', 'open');
-
-            bsModal.on('closed.fndtn.reveal', '[data-reveal]', function () {
-                bsModal.remove();
-            });
-
             if( modal.timeout > 0 ) {
                 startTimeout();
                 element.on('close.fndtn.reveal', '[data-reveal]', stopTimeout);
