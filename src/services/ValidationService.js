@@ -169,7 +169,7 @@
          *      });
          */
         function validate( form ) {
-            var errorClass = !!$(form).attr('data-plenty-checkform') ? $(form).attr('data-plenty-checkform') : 'has-error';
+            var errorClass = !!$(form).attr('data-plenty-checkform') ? $(form).attr('data-plenty-checkform') : 'error';
             var missingFields = [];
 
             var hasError = false;
@@ -260,7 +260,7 @@
             // scroll to element on 'validationFailed'
             $(form).on('validationFailed', function() {
                 var distanceTop = 50;
-                var errorOffset = $(form).find('.has-error').first().offset().top;
+                var errorOffset = $(form).find('.error').first().offset().top;
                 var scrollTarget = $('html, body');
 
                 // if form is inside of modal, scroll modal instead of body
@@ -280,7 +280,7 @@
 
             if ( hasError ) {
                 // remove error class on focus
-                $(form).find('.has-error').each(function(i, elem) {
+                $(form).find('.error').each(function(i, elem) {
                     var formControl = getFormControl(elem);
                     $(formControl).on('focus click', function() {
                         $(formControl).removeClass( errorClass );

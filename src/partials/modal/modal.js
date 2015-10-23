@@ -21,12 +21,11 @@
         },
 
         show: function ( element ) {
-            element.modal( 'show' );
+            element.foundation('reveal','open');
         },
 
         hide: function ( element ) {
-            //$('#second-modal').foundation('reveal', 'close');
-            element.modal('hide');
+            element.foundation('reveal', 'close');
         },
 
         isModal: function ( html ) {

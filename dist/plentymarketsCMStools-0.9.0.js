@@ -383,19 +383,15 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
     pm.partials.Modal = {
         init: function ( element, modal ) {
             element.on('closed.fndtn.reveal', '[data-reveal]', function () {
-                hide();
-            });
-
-            bsModal.foundation('reveal', 'open');
-
-            bsModal.on('closed.fndtn.reveal', '[data-reveal]', function () {
-                bsModal.remove();
+                modal.hide();
             });
 
             if( modal.timeout > 0 ) {
                 startTimeout();
-                element.on('close.fndtn.reveal', '[data-reveal]', stopTimeout);
+                element.on('close.fndtn.reveal', '[data-reveal]', modal.stopTimeout);
                 element.hover(modal.pauseTimeout, function() {
+                    modal.pauseTimeout();
+                }, function () {
                     if( element.is('.open') )
                     {
                         modal.continueTimeout();
@@ -405,12 +401,11 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         },
 
         show: function ( element ) {
-            element.modal( 'show' );
+            element.foundation('reveal','open');
         },
 
         hide: function ( element ) {
-            //$('#second-modal').foundation('reveal', 'close');
-            element.modal('hide');
+            element.foundation('reveal', 'close');
         },
 
         isModal: function ( html ) {
@@ -1172,6 +1167,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 if( modal.timeout > 0 ) {
                     startTimeout();
                 }
+
             }
 
             /**
@@ -1284,8 +1280,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
          */
         var waitScreenCount = 0;
         var waitScreen;
-        var errorPopup;
-
+        var errorPopup = null;
         return {
             throwError: throwError,
             printErrors: printErrors,
@@ -1313,7 +1308,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         function printErrors(errorMessages) {
 
             // create error-popup if not exist
-            if( !errorPopup ) {
+            if( !errorPopup || $('body').has(errorPopup ).length <= 0 ) {
                 errorPopup = $( pm.compileTemplate('error/errorPopup.html') );
                 $('body').append( errorPopup );
                 pm.partials.Error.init( errorPopup );
@@ -1339,7 +1334,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             waitScreenCount = waitScreenCount || 0;
 
             // create wait-overlay if not exist
-            if( !waitScreen ) {
+            if( !waitScreen || $('body').has(waitScreen ).length <= 0 ) {
                 waitScreen = $( pm.compileTemplate('waitscreen/waitscreen.html') );
                 pm.partials.WaitScreen.init( waitScreen );
             }
@@ -1373,6 +1368,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
     });
 }(jQuery, PlentyFramework));
+
 /**
  * Factories provide static functions and can be injected into
  * {{#crossLinkModule "Services"}}services{{/crossLinkModule}}.<br>
@@ -3178,7 +3174,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
          *      });
          */
         function validate( form ) {
-            var errorClass = !!$(form).attr('data-plenty-checkform') ? $(form).attr('data-plenty-checkform') : 'has-error';
+            var errorClass = !!$(form).attr('data-plenty-checkform') ? $(form).attr('data-plenty-checkform') : 'error';
             var missingFields = [];
 
             var hasError = false;
@@ -3269,7 +3265,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             // scroll to element on 'validationFailed'
             $(form).on('validationFailed', function() {
                 var distanceTop = 50;
-                var errorOffset = $(form).find('.has-error').first().offset().top;
+                var errorOffset = $(form).find('.error').first().offset().top;
                 var scrollTarget = $('html, body');
 
                 // if form is inside of modal, scroll modal instead of body
@@ -3289,7 +3285,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
             if ( hasError ) {
                 // remove error class on focus
-                $(form).find('.has-error').each(function(i, elem) {
+                $(form).find('.error').each(function(i, elem) {
                     var formControl = getFormControl(elem);
                     $(formControl).on('focus click', function() {
                         $(formControl).removeClass( errorClass );
@@ -3381,6 +3377,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         return values;
     }
 }(jQuery, PlentyFramework));
+
 /**
  * Services provide functions to be called from the instanced PlentyFramework.<br>
  * Services can inject Factories and can be injected into Directives. The are also
