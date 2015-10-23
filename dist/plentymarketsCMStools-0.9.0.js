@@ -10,7 +10,7 @@ TemplateCache["error/errorMessage.html"] = "<div class=\"plentyErrorBoxContent\"
 
 TemplateCache["error/errorPopup.html"] = "<div class=\"plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
    "    <button class=\"close\" type=\"button\"><span aria-hidden=\"true\">×</span>\n" +
-   "        <span class=\"sr-only\">Close</span>\n" +
+   "        <span class=\"sr-only\">{{#translate}}Close{{/translate}}</span>\n" +
    "    </button>\n" +
    "    <div class=\"plentyErrorBoxInner\">\n" +
    "    </div>\n" +
@@ -29,7 +29,7 @@ TemplateCache["modal/modal.html"] = "<div class=\"reveal-modal medium\" data-rev
    "    {{/labelDismiss}}\n" +
    "\n" +
    "    <button type=\"button\" class=\"button close-reveal-modal\" data-plenty-modal=\"confirm\">{{labelConfirm}}</button>\n" +
-   "    <a class=\"close-reveal-modal\" aria-label=\"Close\">&#215;</a>\n" +
+   "    <a class=\"close-reveal-modal\" aria-label=\"{{#translate}}Close{{/translate}}\">&#215;</a>\n" +
    "</div>\n" +
    "";
 
@@ -62,6 +62,13 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         return instance;
     };
 
+    /**
+     * Customizable controls for partials will be injected here.
+     * (e.g. Modal)
+     * @attribute
+     * @static
+     * @type {object}
+     */
     PlentyFramework.partials = {};
 
     /**
@@ -322,8 +329,78 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         return compiledFactories;
     };
 
+    /**
+     * Renders html template. Will provide given data to templates scope.
+     * Uses <a href="https://github.com/janl/mustache.js/" target="_blank">Mustache syntax</a> for data-binding.
+     * @function compileTemplate
+     * @static
+     * @param {String} template relative path to partials template to load. Base path = '/src/partials/'
+     * @param {Object} data     data to privide to templates scope.
+     * @returns {String}        The rendered html string
+     */
     PlentyFramework.compileTemplate = function( template, data ) {
+        data = data || {};
+        data.translate = function() {
+            return function( text, render ) {
+                return render( PlentyFramework.translate(text) );
+            };
+        };
         return Mustache.render( TemplateCache[template], data );
+    };
+
+    /**
+     * The path on the server where the script is located in.
+     * @attribute
+     * @static
+     * @type {String}
+     */
+    PlentyFramework.scriptPath = '';
+
+    /**
+     * Collection of locale strings will be injected here after reading language file.
+     * @attribute
+     * @static
+     * @type {Object}
+     */
+    PlentyFramework.Strings = {};
+
+    /**
+     * Load language file containing translations of locale strings.
+     * @function loadLanguageFile
+     * @static
+     * @param fileName  relative path to language file.
+     */
+    PlentyFramework.loadLanguageFile = function( fileName ) {
+        $.get( PlentyFramework.scriptPath + fileName ).done(function(response) {
+            PlentyFramework.Strings = response;
+        });
+    };
+
+    /**
+     * Try to get locale translation of given string.
+     * Render translated string using <a href="https://github.com/janl/mustache.js/" target="_blank">Mustache syntax</a>
+     * if additional parameters are given.
+     * @function translate
+     * @static
+     * @param {String} string   The string to translate
+     * @param {Object} [params] additional data for rendering
+     * @returns {String}        The translation of the given string if found. Otherwise returns the original string.
+     */
+    PlentyFramework.translate = function( string, params ) {
+        var localeString;
+        if( PlentyFramework.Strings.hasOwnProperty(string) ) {
+            localeString = PlentyFramework.Strings[string];
+        } else {
+            localeString = string;
+            console.warn('No translation found for "' + localeString + '".');
+        }
+
+        if( !!params ) {
+            localeString = Mustache.render( localeString, params );
+        }
+
+        return localeString;
+
     };
 
     /**
@@ -345,6 +422,11 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             }
         }
 
+        var scripts = document.getElementsByTagName( 'SCRIPT' );
+        if( PlentyFramework.scriptPath.length > 0 ) {
+            PlentyFramework.scriptPath = scripts[ scripts.length - 1 ].src.match( /(.*)\/(.*)\.js(\?\S*)?$/ )[ 1 ];
+        }
+
     };
 
 }(jQuery));
@@ -356,6 +438,10 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
     pm.partials.Error = {
 
+        /**
+         * Will be called, after the error popup was created and injected in DOM.
+         * @param {HTMLElement} popup   The injected element of the popup
+         */
         init: function( popup ) {
             $(popup).find('.close').click(function() {
                 popup.hide();
@@ -363,6 +449,11 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             });
         },
 
+        /**
+         * Will be called for each thrown error. Has to be injected in DOM manually.
+         * @param {HTMLElement} popup   The error popup element
+         * @param {HTMLElement} error   The error message element
+         */
         addError: function( popup, error ) {
             var errorCode = $(error).attr('data-plenty-error-code');
 
@@ -371,6 +462,10 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             }
         },
 
+        /**
+         * Will be called, after initialization and injection of all errors
+         * @param {HTMLElement} popup The error popup element
+         */
         show: function( popup ) {
             $(popup).show();
         }
@@ -381,6 +476,12 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 (function($, pm) {
 
     pm.partials.Modal = {
+
+        /**
+         * Will be called after a new modal was created and injected into DOM
+         * @param {HTMLElement} element The injected modal element
+         * @param {Modal} modal         The instance of the current modal
+         */
         init: function ( element, modal ) {
             element.on('closed.fndtn.reveal', '[data-reveal]', function () {
                 modal.hide();
@@ -400,18 +501,36 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             }
         },
 
+        /**
+         * Will be called if a Modal requests to show.
+         * @param {HTMLElement} element The injected modal element
+         */
         show: function ( element ) {
             element.foundation('reveal','open');
         },
 
+        /**
+         * Will be called if a Modal requests to hide.
+         * @param {HTMLElement} element The injected modal element
+         */
         hide: function ( element ) {
             element.foundation('reveal', 'close');
         },
 
+        /**
+         * Detect if a given HTML string contains a modal
+         * @param {HTMLElement} html the element to search a modal in.
+         * @returns {boolean}   true if a modal was found
+         */
         isModal: function ( html ) {
             return $(html).filter('.reveal-modal' ).length + $(html).find('.reveal-modal' ).length > 0;
         },
 
+        /**
+         * Filter a modal from a given HTML string
+         * @param {HTMLElement}     html the element to get a modal from.
+         * @returns {HTMLElement}   the filtered modal element
+         */
         getModal: function ( html ) {
             var modal = $( html );
             if ( modal.length > 1 ) {
@@ -428,14 +547,18 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
     pm.partials.WaitScreen = {
 
-        init: function( element ) {
-            $('body').append( element );
-        },
-
+        /**
+         * Will be called if the wait screen should be shown
+         * @param {HTMLElement} element The wait screen element
+         */
         show: function( element ) {
             element.addClass('in');
         },
 
+        /**
+         * Will be called if the wait screen should be hidden
+         * @param {HTMLElement} element The wait screen element
+         */
         hide: function( element ) {
             element.removeClass('in');
         }
@@ -539,17 +662,26 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
          */
         function _post( url, data, ignoreErrors, runInBackground ) {
 
+            var params = {
+                type:       'POST',
+                dataType:   'json',
+                error:      function( jqXHR ) { if( !ignoreErrors ) handleError( jqXHR ) }
+            };
+
+            if (data.isFile){
+                    params.cache= data.cache;
+                    params.processData= data.processData;
+                    params.data = data.data;
+                    params.contentType= false;
+            }else{
+                    params.data = JSON.stringify(data);
+                    params.contentType ='application/json';
+            }
+
             if( !runInBackground ) UI.showWaitScreen();
 
             return $.ajax(
-                url,
-                {
-                    type:       'POST',
-                    data:       JSON.stringify(data),
-                    dataType:   'json',
-                    contentType:'application/json',
-                    error:      function( jqXHR ) { if( !ignoreErrors ) handleError( jqXHR ) }
-                }
+                url, params
             ).always( function() {
                     if( !runInBackground ) UI.hideWaitScreen();
                 });
@@ -966,7 +1098,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
              * @private
              * @default "Abbrechen"
              */
-            modal.labelDismiss = 'Abbrechen';
+            modal.labelDismiss = pm.translate("Cancel");
 
             /**
              * the label of the confirmation button
@@ -975,7 +1107,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
              * @private
              * @default "Bestätigen"
              */
-            modal.labelConfirm = 'Bestätigen';
+            modal.labelConfirm = pm.translate("Confirm");
 
             /**
              * Callback when modal is confirmed by clicking confirmation button.
@@ -1281,6 +1413,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         var waitScreenCount = 0;
         var waitScreen;
         var errorPopup = null;
+
         return {
             throwError: throwError,
             printErrors: printErrors,
@@ -1336,7 +1469,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             // create wait-overlay if not exist
             if( !waitScreen || $('body').has(waitScreen ).length <= 0 ) {
                 waitScreen = $( pm.compileTemplate('waitscreen/waitscreen.html') );
-                pm.partials.WaitScreen.init( waitScreen );
+                $('body').append(waitScreen);
             }
 
             pm.partials.WaitScreen.show( waitScreen );
@@ -1611,9 +1744,11 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
          * @param {Array} articleWithParams Containing the current item to add. Read OrderParams will be injected
          */
         function saveOrderParams( articleWithParams ) {
-            var orderParamsForm = $('[data-plenty-checkout-form="OrderParamsForm"]');
-
             //TODO use $("[data-plenty-checkout-form='OrderParamsForm']").serializeArray() to get order params
+            var orderParamsForm = $('[data-plenty-checkout-form="OrderParamsForm"]');
+            var wrappedThis = {};
+            var attrType = "";
+
             //Groups
             orderParamsForm.find('[name^="ParamGroup"]').each(function(){
                 var match = this.name.match(/^ParamGroup\[(\d+)]\[(\d+)]$/);
@@ -1622,13 +1757,20 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
             //Values
             orderParamsForm.find('[name^="ParamValue"]').each(function(){
+                wrappedThis = $(this);
+                attrType = wrappedThis.attr('type');
 
-                if( ($(this).attr('type') == 'checkbox' && $(this).is(':checked')) ||
-                    ($(this).attr('type') == 'radio' && $(this).is(':checked')) ||
-                    ($(this).attr('type') != 'radio' && $(this).attr('type') != 'checkbox') )
+                if( ((attrType == 'checkbox' && wrappedThis.is(':checked')) ||
+                    (attrType == 'radio' && wrappedThis.is(':checked')) ||
+                    (attrType != 'radio' && attrType != 'checkbox')) &&
+                    attrType != 'file')
                 {
                     var match = this.name.match(/^ParamValue\[(\d+)]\[(\d+)]$/);
-                    articleWithParams = addOrderParamValue(articleWithParams, match[1], match[2], $(this).val());
+
+                    articleWithParams = addOrderParamValue(articleWithParams, match[1], match[2], wrappedThis.val());
+
+                } else if (attrType == 'file') {
+                    articleWithParams = orderParamFileUpload(this, articleWithParams);
                 }
             });
 
@@ -1657,6 +1799,43 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 });
         }
 
+        function orderParamFileUpload(input , articleWithParams ) {
+            var key = input.id;
+            var orderParamUploadFiles = {};
+            var orderParamFileIdStack = [];
+            var formData;
+            var fileData;
+            var params = {
+                type: 'POST',
+                data: {},
+                isFile: true,
+                cache: false,
+                dataType: 'json',
+                processData: false,
+                contentType: false
+            };
+
+            orderParamUploadFiles[key] = $(input)[0].files;
+
+            if (orderParamFileIdStack.indexOf(key) == -1) {
+                orderParamFileIdStack.push(key);
+            }
+
+            for(var i= 0, length = orderParamFileIdStack.length; i < length; ++i){
+                formData = new FormData();
+                fileData = orderParamUploadFiles[orderParamFileIdStack[i]];
+                formData.append("0", fileData[0], fileData[0].name);
+
+                params.data = formData;
+
+                API.post("/rest/checkout/orderparamfile/", params);
+            }
+
+            var match = input.name.match(/^ParamValueFile\[(\d+)]\[(\d+)]$/);
+
+            return addOrderParamValue(articleWithParams, match[1], match[2], $(input).val());
+        }
+
         /**
          * Inject an OrderParam.
          * @function addOrderParamValue
@@ -1681,11 +1860,12 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 {
                     basketList[position].BasketItemOrderParamsList = [];
                 }
-
-                basketList[position].BasketItemOrderParamsList.push({
-                    BasketItemOrderParamID : paramId,
-                    BasketItemOrderParamValue : paramValue
-                });
+                if(paramValue){
+                    basketList[position].BasketItemOrderParamsList.push({
+                        BasketItemOrderParamID : paramId,
+                        BasketItemOrderParamValue : paramValue
+                    });
+                }
             }
 
             return basketList;
@@ -1703,6 +1883,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             // get item name
             var itemName, originalItemQuantity;
             var params = Checkout.getCheckout().BasketItemsList;
+
             for ( var i = 0; i < params.length; i++ ) {
                 if ( params[i].BasketItemID == BasketItemID ) {
                     originalItemQuantity = params[i].BasketItemQuantity;
@@ -1731,15 +1912,15 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             if( !forceDelete ) {
                 // show confirmation popup
                 Modal.prepare()
-                    .setTitle('Bitte bestätigen')
-                    .setContent('<p>Möchten Sie den Artikel "' + itemName + '" wirklich aus dem Warenkorb entfernen?</p>')
+                    .setTitle( pm.translate('Please confirm') )
+                    .setContent('<p>' + pm.translate( "Do you really want to remove \"{{item}}\" from your basket?", {item: itemName}) + '</p>')
                     .onDismiss(function () {
                         $('[data-basket-item-id="' + BasketItemID + '"]').find('[data-plenty="quantityInput"]').val(originalItemQuantity);
                     })
                     .onConfirm(function () {
                         doDelete();
                     })
-                    .setLabelConfirm('Löschen')
+                    .setLabelConfirm( pm.translate("Delete") )
                     .show();
             } else {
                 doDelete();
@@ -1762,6 +1943,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             var params = Checkout.getCheckout().BasketItemsList;
             var basketItem;
             var basketItemIndex;
+
             for ( var i = 0; i < params.length; i++ ) {
                 if ( params[i].BasketItemID == BasketItemID ) {
                     basketItemIndex = i;
@@ -2897,6 +3079,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
      */
     pm.service('SocialShareService', function() {
 
+        //TODO: move to global variables
         if ( typeof(socialLangLocale) == 'undefined' ) socialLangLocale = 'en_US';
         if ( typeof(socialLang) == 'undefined' ) socialLang = 'en';
 
@@ -3036,19 +3219,20 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
          * @return {object} a valid form element (input, select, textarea)
          */
         function getFormControl( element ) {
-            if( $(element).is('input') || $(element).is('select') || $(element).is('textarea') ) {
-                return $(element);
+            element = $(element);
+            if( element.is('input') || element.is('select') || element.is('textarea') ) {
+                return element;
             } else {
-                if( $(element).find('input').length > 0 ) {
-                    return $(element).find('input');
+                if( element.find('input').length > 0 ) {
+                    return element.find('input');
                 }
 
-                else if ( $(element).find('select').length > 0 ) {
-                    return $(element).find('select');
+                else if ( element.find('select').length > 0 ) {
+                    return element.find('select');
                 }
 
-                else if ( $(element).find('textarea').length > 0 ) {
-                    return $(element).find('textarea');
+                else if ( element.find('textarea').length > 0 ) {
+                    return element.find('textarea');
                 }
 
                 else {
@@ -3067,12 +3251,12 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
          */
         function validateText( formControl ) {
             // check if formControl is no checkbox or radio
-            if ( $(formControl).is('input') || $(formControl).is('select') || $(formControl).is('textarea') ) {
+            if ( formControl.is('input') || formControl.is('select') || formControl.is('textarea') ) {
                 // check if length of trimmed value is greater then zero
-                return $.trim( $(formControl).val() ).length > 0;
+                return $.trim( formControl.val() ).length > 0;
 
             } else {
-                console.error('Validation Error: Cannot validate Text for <' + $(formControl).prop("tagName") + '>');
+                console.error('Validation Error: Cannot validate Text for <' + formControl.prop("tagName") + '>');
                 return false;
             }
         }
@@ -3087,7 +3271,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         function validateMail( formControl ) {
             var mailRegExp = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
             if ( validateText(formControl) ) {
-                return mailRegExp.test( $.trim( $(formControl).val() ) );
+                return mailRegExp.test( $.trim( formControl.val() ) );
             } else {
                 return false;
             }
@@ -3102,7 +3286,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
          */
         function validateNumber( formControl ) {
             if ( validateText(formControl) ) {
-                return $.isNumeric( $.trim( $(formControl).val() ) );
+                return $.isNumeric( $.trim( formControl.val() ) );
             } else {
                 return false;
             }
@@ -3118,10 +3302,18 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
          */
         function validateValue( formControl, reference ) {
             if( $(reference).length > 0 ) {
-                return $.trim( $(formControl).val() ) == $.trim( $(reference).val() );
+                return $.trim( formControl.val() ) == $.trim( $(reference).val() );
             } else {
-                return $.trim( $(formControl).val() ) == reference;
+                return $.trim( formControl.val() ) == reference;
             }
+        }
+
+        function visibility( formControl ) {
+            return formControl.is(':visible');
+        }
+
+        function isEnabled( formControl ) {
+            return formControl.is(':enabled');
         }
 
         /**
@@ -3174,31 +3366,36 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
          *      });
          */
         function validate( form ) {
-            var errorClass = !!$(form).attr('data-plenty-checkform') ? $(form).attr('data-plenty-checkform') : 'error';
+            var formControl, formControls, validationKey, currentHasError, group, checked, checkedMin, checkedMax, attrValidate, validationKeys, formControlAttrType;
+            var wrappedForm = $(form);
+            var errorClass = !!wrappedForm.attr('data-plenty-checkform') ? wrappedForm.attr('data-plenty-checkform') : 'error';
             var missingFields = [];
-
             var hasError = false;
 
             // check every required input inside form
-            $(form).find('[data-plenty-validate], input.Required').each(function(i, elem) {
+            wrappedForm.find('[data-plenty-validate], input.Required').each(function(i, elem) {
+                attrValidate = $(elem).attr('data-plenty-validate');
+                formControls = getFormControl(elem)
                 // validate text inputs
-                var validationKeys = !!$(elem).attr('data-plenty-validate') ? $(elem).attr('data-plenty-validate') : 'text';
+                validationKeys = !!attrValidate ? attrValidate : 'text';
                 validationKeys = validationKeys.split(',');
 
-                var formControls = getFormControl(elem);
-                for(i = 0; i < formControls.length; i++) {
-                    var formControl = formControls[i];
-                    var validationKey = validationKeys[i].trim() || validationKeys[0].trim();
+                for(var i = 0, length = formControls.length; i < length; i++) {
+                    formControl = $(formControls[i]);
+                    formControlAttrType = formControl.attr('type');
 
-                    if (!$(formControl).is(':visible') || !$(formControl).is(':enabled')) {
+                    if (!visibility(formControl) || !isEnabled(formControl)) {
                         return;
                     }
-                    var currentHasError = false;
 
+                    validationKey = validationKeys[i].trim() || validationKeys[0].trim();
+                    currentHasError = false;
 
                     // formControl is textfield (text, mail, password) or textarea
-                    if (($(formControl).is('input') && $(formControl).attr('type') != 'radio' && $(formControl).attr('type') != 'checkbox') || $(formControl).is('textarea')) {
-
+                    if ((formControl.is('input')
+                        && formControlAttrType != 'radio'
+                        && formControlAttrType != 'checkbox')
+                        || formControl.is('textarea')) {
                         switch (validationKey) {
 
                             case 'text':
@@ -3216,33 +3413,36 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                             case 'value':
                                 currentHasError = !validateValue(formControl, $(elem).attr('data-plenty-validation-value'));
                                 break;
+
                             case 'none':
                                 // do not validate
                                 break;
+
                             default:
-                                console.error('Form validation error: unknown validate property: "' + $(elem).attr('data-plenty-validate') + '"');
+                                console.error('Form validation error: unknown validate property: "' + attrValidate + '"');
                                 break;
                         }
-                    } else if ($(formControl).is('input') && ($(formControl).attr('type') == 'radio' || $(formControl).attr('type') == 'checkbox')) {
+                    } else if (formControl.is('input')
+                        && (formControlAttrType == 'radio'
+                        || formControlAttrType == 'checkbox')) {
                         // validate radio buttons
-                        var group = $(formControl).attr('name');
-                        var checked, checkedMin, checkedMax;
-                        checked = $(form).find('input[name="' + group + '"]:checked').length;
+                        group = formControl.attr('name');
+                        checked = wrappedForm.find('input[name="' + group + '"]:checked').length;
 
-                        if ($(formControl).attr('type') == 'radio') {
+                        if (formControlAttrType == 'radio') {
                             checkedMin = 1;
                             checkedMax = 1;
                         } else {
-                            eval("var minMax = " + $(elem).attr('data-plenty-validate'));
+                            eval("var minMax = " + attrValidate);
                             checkedMin = !!minMax ? minMax.min : 1;
                             checkedMax = !!minMax ? minMax.max : 1;
                         }
 
                         currentHasError = ( checked < checkedMin || checked > checkedMax );
 
-                    } else if ($(formControl).is('select')) {
+                    } else if (formControl.is('select')) {
                         // validate selects
-                        currentHasError = ( $(formControl).val() == '' || $(formControl).val() == '-1' );
+                        currentHasError = ( formControl.val() == '' || formControl.val() == '-1' );
                     } else {
                         console.error('Form validation error: ' + $(elem).prop("tagName") + ' does not contain an form element');
                         return;
@@ -3253,26 +3453,27 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                         missingFields.push(formControl);
 
                         if(formControls.length > 1 ) {
-                            $(formControl).addClass(errorClass);
-                            $(form).find('label[for="'+$(formControl).attr('id')+'"]').addClass(errorClass);
+                            formControl.addClass(errorClass);
+                            wrappedForm.find('label[for="'+formControl.attr('id')+'"]').addClass(errorClass);
                         } else {
                             $(elem).addClass(errorClass);
                         }
                     }
                 }
+
             });
 
             // scroll to element on 'validationFailed'
-            $(form).on('validationFailed', function() {
+            wrappedForm.on('validationFailed', function() {
                 var distanceTop = 50;
-                var errorOffset = $(form).find('.error').first().offset().top;
+                var errorOffset = wrappedForm.find('.error').first().offset().top;
                 var scrollTarget = $('html, body');
 
                 // if form is inside of modal, scroll modal instead of body
-                if( $(form).parents('.modal').length > 0 ) {
-                    scrollTarget = $(form).parents('.modal');
-                } else if( $(form).is('.modal') ) {
-                    scrollTarget = $(form);
+                if( wrappedForm.parents('.modal').length > 0 ) {
+                    scrollTarget = wrappedForm.parents('.modal');
+                } else if( wrappedForm.is('.modal') ) {
+                    scrollTarget = wrappedForm;
                 }
 
                 // only scroll if error is outside of viewport
@@ -3285,23 +3486,24 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
             if ( hasError ) {
                 // remove error class on focus
-                $(form).find('.error').each(function(i, elem) {
-                    var formControl = getFormControl(elem);
-                    $(formControl).on('focus click', function() {
-                        $(formControl).removeClass( errorClass );
-                        $(form).find('label[for="'+$(formControl).attr('id')+'"]').removeClass(errorClass);
+                wrappedForm.find('.error').each(function(i, elem) {
+                    formControl = $(getFormControl(elem));
+                    formControl.on('focus click', function() {
+                        formControl.removeClass( errorClass );
+                        wrappedForm.find('label[for="'+formControl.attr('id')+'"]').removeClass(errorClass);
                         $(elem).removeClass( errorClass );
                     });
                 });
 
-                $(form).trigger('validationFailed', [missingFields]);
+                wrappedForm.trigger('validationFailed', [missingFields]);
             }
 
-            var callback = $(form).attr('data-plenty-callback');
+            var callback = wrappedForm.attr('data-plenty-callback');
+
             if( !hasError && !!callback && callback != "submit" && typeof window[callback] == "function") {
 
                 var fields = {};
-                $(form).find('input, textarea, select').each(function (){
+                wrappedForm.find('input, textarea, select').each(function (){
                     if( $(this).attr('type') == 'checkbox' ) {
                         fields[$(this).attr('name')] = $(this).is(':checked');
                     } else {
