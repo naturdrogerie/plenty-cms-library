@@ -278,7 +278,7 @@
             // scroll to element on 'validationFailed'
             wrappedForm.on('validationFailed', function() {
                 var distanceTop = 50;
-                var errorOffset = wrappedForm.find('.error').first().offset().top;
+                var errorOffset = wrappedForm.find(errorClass).first().offset().top;
                 var scrollTarget = $('html, body');
 
                 // if form is inside of modal, scroll modal instead of body
@@ -298,7 +298,7 @@
 
             if ( hasError ) {
                 // remove error class on focus
-                wrappedForm.find('.error').each(function(i, elem) {
+                wrappedForm.find(errorClass).each(function(i, elem) {
                     formControl = $(getFormControl(elem));
                     formControl.on('focus click', function() {
                         formControl.removeClass( errorClass );
