@@ -423,7 +423,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         }
 
         var scripts = document.getElementsByTagName( 'SCRIPT' );
-        if( PlentyFramework.scriptPath.length > 0 ) {
+        if( scripts.length > 0 ) {
             PlentyFramework.scriptPath = scripts[ scripts.length - 1 ].src.match( /(.*)\/(.*)\.js(\?\S*)?$/ )[ 1 ];
         }
 
@@ -431,9 +431,41 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
 }(jQuery));
 
+PlentyFramework.cssClasses = {
+
+    active:     'active',
+    disabled:   'disabled',
+    visited:    'visited',
+    visible:    'visible',
+    in:         'in',
+    on:         'on',
+    off:        'off',
+    open:       'open',
+    animating:  'animating',
+    concat:  function(str) {
+        var args = str.split(" ");
+        var string = "";
+        var cssClass;
+        for (var i = 0, len = args.length; i < len; i++) {
+            cssClass = PlentyFramework.cssClasses[args[i]];
+            if (cssClass) {
+                string += (i+1 == len) ? cssClass : (cssClass + " ");
+            } else {
+                console.error(args[i] + " is not a valid CSS class.");
+                continue;
+            }
+
+        }
+        return string;
+    }
+
+};
 
 
 
+
+
+/// PlentyFramework.cssClasses.active === PlentyFramework.cssClasses['active'];
 (function($, pm) {
 
     pm.partials.Error = {
@@ -552,7 +584,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
          * @param {HTMLElement} element The wait screen element
          */
         show: function( element ) {
-            element.addClass('in');
+            element.addClass(pm.cssClasses.in);
         },
 
         /**
@@ -560,7 +592,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
          * @param {HTMLElement} element The wait screen element
          */
         hide: function( element ) {
-            element.removeClass('in');
+            element.removeClass(pm.cssClasses.in);
         }
 
     };
@@ -668,14 +700,14 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 error:      function( jqXHR ) { if( !ignoreErrors ) handleError( jqXHR ) }
             };
 
-            if (data != null && data.isFile){
-                    params.cache= data.cache;
-                    params.processData= data.processData;
-                    params.data = data.data;
-                    params.contentType= false;
-            }else{
-                    params.data = JSON.stringify(data);
-                    params.contentType ='application/json';
+            if( !!data && data.isFile ) {
+                    params.cache        = data.cache;
+                    params.processData  = data.processData;
+                    params.data         = data.data;
+                    params.contentType  = false;
+            } else {
+                    params.data         = JSON.stringify(data);
+                    params.contentType  = 'application/json';
             }
 
             if( !runInBackground ) UI.showWaitScreen();
@@ -2698,7 +2730,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
                 // initialize navigation
                 navigation.each(function(i, elem) {
-                    $(elem).addClass('disabled');
+                    $(elem).addClass(pm.cssClasses.disabled);
                     // handle navigation click events
                     $(elem).click(function() {
                         if( !$(this).is('.disabled') ) {
@@ -2864,22 +2896,22 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
             // refresh navigation elements
             $(navigation).each(function (i, elem) {
-                $(elem).removeClass('disabled active');
+                $(elem).removeClass(pm.cssClasses.concat('disabled active'));
                 $(elem).find('[role="tab"]').attr('aria-selected', 'false');
 
                 if (i < current) {
                     // set current element as active
-                    $(elem).addClass('visited');
+                    $(elem).addClass(pm.cssClasses.visited);
                 }
                 else {
                     if (i == current) {
-                        $(elem).addClass('active visited');
+                        $(elem).addClass(pm.cssClasses.concat('active visited'));
                         $(elem).find('[role="tab"]').attr('aria-selected', 'true');
                     }
                     else {
                         if (i > current && !$(elem).is('.visited')) {
                             // disable elements behind active
-                            $(elem).addClass('disabled');
+                            $(elem).addClass(pm.cssClasses.disabled);
                         }
                     }
                 }
@@ -3785,8 +3817,8 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
        if( $(elem).attr('data-plenty-enable') == "toggle-xs-sm-or-touch" ) {
             $(elem).click(function(e) {
                 if ( MediaSizeService.interval() == 'xs' || MediaSizeService.interval() == 'sm' || ( MediaSizeService.interval() != 'xs' && MediaSizeService.interval() != 'sm' && Modernizr.touch ) ) {
-                    $('.dropdown.open > a[data-plenty-enable="toggle-xs-sm-or-touch"]').not( $(this) ).parent().removeClass('open');
-                    $(this).parent().toggleClass('open');
+                    $('.dropdown.open > a[data-plenty-enable="toggle-xs-sm-or-touch"]').not( $(this) ).parent().removeClass(pm.cssClasses.open);
+                    $(this).parent().toggleClass(pm.cssClasses.open);
                     return false;
                 }
             });
@@ -3796,9 +3828,9 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         else if( $(elem).attr('data-plenty-enable') == "touch" ) {
             $(elem).click(function() {
                 if ( MediaSizeService.interval() != 'xs' && MediaSizeService.interval() != 'sm' && Modernizr.touch ) { // otherwise already has mobile navigation
-                    $('.dropdown.open > a[data-plenty-enable="touch"]').not( $(this) ).parent().removeClass('open');
-                    if ( ! $(this).parent().hasClass('open') ) {
-                        $(this).parent().addClass('open');
+                    $('.dropdown.open > a[data-plenty-enable="touch"]').not( $(this) ).parent().removeClass(pm.cssClasses.open);
+                    if ( ! $(this).parent().hasClass(pm.cssClasses.open) ) {
+                        $(this).parent().addClass(pm.cssClasses.open);
                         return false;
                     }
                 }
@@ -3807,49 +3839,50 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
     }, ['MediaSizeService']);
 
 
-    pm.directive('*', function(i, elem, MediaSizeService) {
+    pm.directive('*', function(i, elem, MediaSizeService, cc) {
+
 
         $(elem).click(function (e) {
             if (MediaSizeService.interval() == 'xs' || MediaSizeService.interval() == 'sm' || ( MediaSizeService.interval() != 'xs' && MediaSizeService.interval() != 'sm' && Modernizr.touch )) {
                 var dropdown = $('.dropdown.open > a[data-plenty-enable="toggle-xs-sm-or-touch"]').parent();
                 if (dropdown.length > 0 && !dropdown.is(e.target) && dropdown.has(e.target).length <= 0) {
-                    dropdown.removeClass('open');
+                    dropdown.removeClass(pm.cssClasses.open);
                 }
             }
 
             if (MediaSizeService.interval() != 'xs' && MediaSizeService.interval() != 'sm' && Modernizr.touch) {
                 var dropdown = $('.dropdown.open > a[data-plenty-enable="touch"]').parent();
                 if (dropdown.length > 0 && !dropdown.is(e.target) && dropdown.has(e.target).length <= 0) {
-                    dropdown.removeClass('open');
+                    dropdown.removeClass(pm.cssClasses.open);
                 }
             }
         });
     }, ['MediaSizeService']);
 
 
-    pm.directive(window, function(i, elem, MediaSizeService) {
+    pm.directive(window, function(i, elem, MediaSizeService, cc) {
+
+
         $(window).on('orientationchange', function() {
             if ( MediaSizeService.interval() == 'xs' || MediaSizeService.interval() == 'sm' || ( MediaSizeService.interval() != 'xs' && MediaSizeService.interval() != 'sm' && Modernizr.touch ) ) {
-                $('.dropdown.open > a[data-plenty-enable="toggle-xs-sm-or-touch"]').parent().removeClass('open');
+                $('.dropdown.open > a[data-plenty-enable="toggle-xs-sm-or-touch"]').parent().removeClass(pm.cssClasses.open);
             }
 
             if ( MediaSizeService.interval() != 'xs' && MediaSizeService.interval() != 'sm' && Modernizr.touch ) {
-                $('.dropdown.open > a[data-plenty-enable="touch"]').parent().removeClass('open');
+                $('.dropdown.open > a[data-plenty-enable="touch"]').parent().removeClass(pm.cssClasses.open);
             }
         });
         $(window).on('sizeChange', function(newValue) {
             if ( newValue != 'xs' && newValue != 'sm' && ! Modernizr.touch ) {
-                $('.dropdown.open > a[data-plenty-enable="toggle-xs-sm-or-touch"]').parent().removeClass('open');
+                $('.dropdown.open > a[data-plenty-enable="toggle-xs-sm-or-touch"]').parent().removeClass(pm.cssClasses.open);
             }
         });
     }, ['MediaSizeService']);
 
     $(document).ready(function() {
-
-        // if ( pm.getInstance().MediaSizeService.interval() != 'xs' && pm.getInstance().MediaSizeService.interval() != 'sm' && Modernizr.touch ) {
-        //     $('.dropdown.open > a[data-plenty-enable="touch"]').parent().removeClass('open');
-        // }
-
+        if ( pm.getInstance().MediaSizeService.interval() != 'xs' && pm.getInstance().MediaSizeService.interval() != 'sm' && Modernizr.touch ) {
+            $('.dropdown.open > a[data-plenty-enable="touch"]').parent().removeClass(pm.cssClasses.open);
+        }
     });
 
 }(jQuery, PlentyFramework));
@@ -3892,16 +3925,16 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
     // Tree navigation toggle
     pm.directive('[data-plenty="openCloseToggle"]', function(i, elem) {
         $(elem).click(function () {
-            $(elem).parent().addClass('animating');
+            $(elem).parent().addClass(pm.cssClasses.animating);
             $(elem).siblings('ul').slideToggle(200, function () {
                 if ($(elem).parent().is('.open')) {
-                    $(elem).parent().removeClass('open');
+                    $(elem).parent().removeClass(pm.cssClasses.open);
                 }
                 else {
-                    $(elem).parent().addClass('open');
+                    $(elem).parent().addClass(pm.cssClasses.open);
                 }
                 $(elem).removeAttr('style');
-                $(elem).parent().removeClass('animating');
+                $(elem).parent().removeClass(pm.cssClasses.animating);
             });
         });
 
@@ -4058,10 +4091,10 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             $(trigger).click(function() {
                 $(target).parents('[data-plenty-equal-target]').css('height', 'auto');
 
-                $(trigger).addClass('animating');
+                $(trigger).addClass(pm.cssClasses.animating);
                 $(target).slideToggle(400, function() {
-                    $(trigger).removeClass('animating');
-                    $(trigger).toggleClass('active');
+                    $(trigger).removeClass(pm.cssClasses.animating);
+                    $(trigger).toggleClass(pm.cssClasses.active);
                     pm.getInstance().bindDirectives('[data-plenty-equal]');
                 });
             });
@@ -4108,15 +4141,15 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         $(elem).append('<div class="social-container"></div>');
 
         // add "off" class to switch, if neither "off" or "on" is set
-        if ( !toggle.hasClass('off') && !toggle.hasClass('on') ) {
-            toggle.addClass('off');
+        if ( !toggle.hasClass(pm.cssClasses.off) && !toggle.hasClass(pm.cssClasses.on) ) {
+            toggle.addClass(pm.cssClasses.off);
         }
 
         // toggle switch
         toggle.on('click', function() {
-            if ( toggle.hasClass('off') ) {
+            if ( toggle.hasClass(pm.cssClasses.off) ) {
                 if ( $(elem).attr("data-toggle") == "tooltip" ) { $(elem).tooltip('destroy') };
-                toggle.removeClass('off').addClass('on');
+                toggle.removeClass(pm.cssClasses.off).addClass(pm.cssClasses.on);
                 // hide dummy button
                 $(elem).find('[data-plenty="placeholder"]').hide();
                 // load HTML defined in 'api'
@@ -4217,8 +4250,8 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 // listen to 'tabchange' event
                 $(singleTab).on('tabchange', function() {
                     // toggle class 'active'
-                    $(singleTab).closest('[data-plenty="remoteTabs"]').children('.active').removeClass('active');
-                    $(singleTab).closest('li').addClass('active');
+                    $(singleTab).closest('[data-plenty="remoteTabs"]').children('.active').removeClass(pm.cssClasses.active);
+                    $(singleTab).closest('li').addClass(pm.cssClasses.active);
 
                     // hide inactive tabs & show active tab
                     var tabpanelsInactive = $('[data-plenty-remotetabs-id="'+tabsId+'"][data-plenty-tabpanel-labelledby]').not('[data-plenty-tabpanel-labelledby="'+singleTabId+'"]');
@@ -4233,8 +4266,8 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                     }
 
                     // adjust z-index if neccessary
-                    $(tabpanelsInactive).hide().removeClass('in');
-                    $(tabpanelActive).show().addClass('in');
+                    $(tabpanelsInactive).hide().removeClass(pm.cssClasses.in);
+                    $(tabpanelActive).show().addClass(pm.cssClasses.in);
                     if ( zIndexTabpanelParents != 0 ) {
                         $(tabpanelsInactive).parent().css('zIndex', zIndexTabpanelParents);
                         $(tabpanelActive).parent().css('zIndex', zIndexTabpanelParents + 1);
@@ -4262,6 +4295,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 (function($, pm) {
 
     pm.directive('[data-plenty="toTop"]', function(i, elem) {
+
         $(elem).click(function() {
             $('html, body').animate({
                 scrollTop: 0
@@ -4271,9 +4305,9 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
         var positionToTopButton = function() {
             if( $(document).scrollTop() > 100 ) {
-                $(elem).addClass('visible');
+                $(elem).addClass(pm.cssClasses.visible);
             } else {
-                $(elem).removeClass('visible');
+                $(elem).removeClass(pm.cssClasses.visible);
             }
         };
 

@@ -197,6 +197,10 @@ add more language files containing your translations of the defined strings.
 #### Loading a language file
 
 Language files should be loaded immediately after loading the the JavaScript library.
+<<<<<<< HEAD
+=======
+
+>>>>>>> plentymarkets/plenty_dev
 **Example:**
 ```html
 <script src="plentymarketsCMStools-X.X.X.min.js"></script>
@@ -231,7 +235,12 @@ If the language file not contains a translation it returns the original String.
 so you can bind variables to your string.
 
 **Examples:**
+<<<<<<< HEAD
 translations.json
+=======
+
+`translations.json`
+>>>>>>> plentymarkets/plenty_dev
 ```json
 {
 	"Close": "Exit",
@@ -239,11 +248,19 @@ translations.json
 }
 ```
 
+<<<<<<< HEAD
 script.js
 ```js
 PlentyFramework.translate("Close"); // returns "Exit"
 PlentyFramework.translate("Hello {{name}}", {name: 'World'}); // returns "Hello World!"
 PlentyFramework.translate("Something"); // returns "Something"
+=======
+`script.js`
+```js
+PlentyFramework.translate("Close"); // returns "Exit"
+PlentyFramework.translate("Hello {{name}}", {name: 'World'}); // returns "Hi World!"
+PlentyFramework.translate("Something"); // returns "Something" (as fallback value)
+>>>>>>> plentymarkets/plenty_dev
 ```
 
 #### Using multilingual Strings in HTML-Templates

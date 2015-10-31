@@ -10,6 +10,7 @@
 (function($, pm) {
 
     pm.directive('[data-plenty="toTop"]', function(i, elem) {
+
         $(elem).click(function() {
             $('html, body').animate({
                 scrollTop: 0
@@ -19,9 +20,9 @@
 
         var positionToTopButton = function() {
             if( $(document).scrollTop() > 100 ) {
-                $(elem).addClass('visible');
+                $(elem).addClass(pm.cssClasses.visible);
             } else {
-                $(elem).removeClass('visible');
+                $(elem).removeClass(pm.cssClasses.visible);
             }
         };
 

@@ -386,13 +386,10 @@
         }
 
         var scripts = document.getElementsByTagName( 'SCRIPT' );
-        if( PlentyFramework.scriptPath.length > 0 ) {
+        if( scripts.length > 0 ) {
             PlentyFramework.scriptPath = scripts[ scripts.length - 1 ].src.match( /(.*)\/(.*)\.js(\?\S*)?$/ )[ 1 ];
         }
 
     };
 
 }(jQuery));
-
-
-
