@@ -98,7 +98,7 @@
             var shippingAddressID = $('[name="shippingAddressID"]:checked').val();
 
             // TODO: move bootstrap specific function
-            $('#shippingAdressSelect').modal('hide');
+            $('#shippingAdressSelect').foundation('reveal', 'close');
 
             if ( shippingAddressID < 0) {
                 // save separate

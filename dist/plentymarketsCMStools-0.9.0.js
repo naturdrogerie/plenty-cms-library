@@ -668,7 +668,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 error:      function( jqXHR ) { if( !ignoreErrors ) handleError( jqXHR ) }
             };
 
-            if (data.isFile){
+            if (data != null && data.isFile){
                     params.cache= data.cache;
                     params.processData= data.processData;
                     params.data = data.data;
@@ -757,6 +757,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
     }, ['UIFactory']);
 }(jQuery, PlentyFramework));
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
@@ -2166,7 +2167,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             var shippingAddressID = $('[name="shippingAddressID"]:checked').val();
 
             // TODO: move bootstrap specific function
-            $('#shippingAdressSelect').modal('hide');
+            $('#shippingAdressSelect').foundation('reveal', 'close');
 
             if ( shippingAddressID < 0) {
                 // save separate
@@ -2539,6 +2540,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
 	}, ['APIFactory', 'CMSFactory', 'CheckoutFactory', 'ModalFactory']);
 }(jQuery, PlentyFramework));
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
