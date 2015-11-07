@@ -6,12 +6,10 @@ TemplateCache["error/errorMessage.html"] = "<div class=\"plentyErrorBoxContent\"
    "</div>\n" +
    "";
 
-TemplateCache["error/errorPopup.html"] = "<div class=\"plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
-   "    <button class=\"close\" type=\"button\"><span aria-hidden=\"true\">×</span>\n" +
-   "        <span class=\"sr-only\">{{#translate}}Close{{/translate}}</span>\n" +
-   "    </button>\n" +
-   "    <div class=\"plentyErrorBoxInner\">\n" +
-   "    </div>\n" +
+TemplateCache["error/errorPopup.html"] = "<div data-alert class=\"alert-box alert radius plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
+   "  <div class=\"plentyErrorBoxInner\">\n" +
+   "  </div>\n" +
+   "  <button tabindex=\"0\" class=\"close\" aria-label=\"{{#translate}}Close{{/translate}}\">&times;</button>\n" +
    "</div>\n" +
    "";
 
@@ -22,11 +20,10 @@ TemplateCache["modal/modal.html"] = "<div class=\"reveal-modal medium\" data-rev
    "\n" +
    "    {{{content}}}\n" +
    "\n" +
+   "    <button type=\"button\" class=\"button right\" data-dismiss=\"modal\" data-plenty-modal=\"confirm\">{{labelConfirm}}</button>\n" +
    "    {{#labelDismiss}}\n" +
-   "    <button type=\"button\" class=\"button secondary close-reveal-modal\">{{labelDismiss}}</button>\n" +
+   "    <button type=\"button\" class=\"button info\" data-dismiss=\"modal\">{{labelDismiss}}</button>\n" +
    "    {{/labelDismiss}}\n" +
-   "\n" +
-   "    <button type=\"button\" class=\"button close-reveal-modal\" data-plenty-modal=\"confirm\">{{labelConfirm}}</button>\n" +
    "    <a class=\"close-reveal-modal\" aria-label=\"{{#translate}}Close{{/translate}}\">&#215;</a>\n" +
    "</div>\n" +
    "";

@@ -367,6 +367,8 @@
          * @function fillNavigation
          */
         function fillNavigation() {
+            // function not needed because of some nice css.
+            return;
             // break if manager has not been initialized
             var navigationCount = navigation.length;
             if( navigationCount <= 0 ) return;

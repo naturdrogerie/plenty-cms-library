@@ -55,11 +55,14 @@
          * @param {Array} errorMessages A list of errors to display
          */
         function printErrors(errorMessages) {
-
+            var errorContainer = $('body');
+            if ($('body').has('.alert-box-container')) {
+              errorContainer = $('.alert-box-container').first();
+            }
             // create error-popup if not exist
-            if( !errorPopup || $('body').has(errorPopup ).length <= 0 ) {
+            if( !errorPopup || errorContainer.has(errorPopup ).length <= 0 ) {
                 errorPopup = $( pm.compileTemplate('error/errorPopup.html') );
-                $('body').append( errorPopup );
+                errorContainer.append( errorPopup );
                 pm.partials.Error.init( errorPopup );
             }
 
