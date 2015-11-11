@@ -53,9 +53,10 @@ Open templates: `PageDesignContent`, `PageDesignCheckout`, `PageDesignMyAccount`
 </script>
 ```
 If you cannot find this code see [Update your Callisto Light using dependecyInjector](#update-your-callisto-light-using-dependecyinjector).
-**ATTENTION:** In each template you can find two similar occurrences of this snippet. Be sure that the value of the parameter `position` is `'body'`
 
-Add the following lines after each found occurrence:
+**ATTENTION:** In each template you will find two similar occurrences of this snippet. Make sure that the value of the parameter `position` is `'body'`
+
+Add the following lines after each occurrence:
 
 ```html
 <script>
@@ -66,13 +67,15 @@ Add the following lines after each found occurrence:
     {% endif %}
 </script>
 ```
-**ATTENTION:** Do not wrap these calls in the same &lt;script&gt;-Tag. Be sure to have separate &lt;script&gt;-Tags for each call.
+
+**ATTENTION:** Do not wrap these calls in the same &lt;script&gt; tag. Be sure to have separate &lt;script&gt; tags for each call.
 
 ### Step 5: Edit Category for Checkout-Step 3
 
 Open the category which is set for Checkout-Step 3. By default this category is named "Kasse".
 Search for
 ```html
+{% if GetGlobal("ShowTabDetails") %}
 <!-- STEP 1: Order details -->
 <div class="container" data-plenty-checkout-id="details" id="checkoutPanelOrderDetails" aria-labelledby="checkoutTabOrderDetails" role="tabpanel">
     {% $_id = CheckoutStepPageID(4) %}
@@ -101,6 +104,7 @@ Search for
 and edit to:
 
 ```html
+{% if GetGlobal("ShowTabDetails") %}
 <!-- STEP 1: Order details -->
 {% $_id = CheckoutStepPageID(4) %}
 <div class="container" data-plenty-checkout-id="details" id="checkoutPanelOrderDetails" aria-labelledby="checkoutTabOrderDetails" role="tabpanel" data-plenty-checkout-content="$_id">
@@ -148,9 +152,9 @@ if ( !response || (response.data.CheckoutMethodOfPaymentRedirectURL == '' && res
 
 Perform **Step 1** and **Step 2** as described above.
 
-### Step 3: Include new files in your template
+### Step 3 (alternative): Include new files in your template
 
-Download and open `LAYOUT_FOLDER/js/plenty/dependencies.json` and change insert the new file to use:
+Download and open `LAYOUT_FOLDER/js/plenty/dependencies.json` and change the file to use:
 ```js
 {
   "PageDesignGlobal": {
@@ -169,7 +173,7 @@ Download and open `LAYOUT_FOLDER/js/plenty/dependencies.json` and change insert 
 ```
 Upload the edited file back to your webspace (you will override the existing version).
 
-### Step 4: Load language files in your PageDesign-templates
+### Step 4 (alternative): Load language files in your PageDesign-templates
 
 Open templates: `PageDesignContent`, `PageDesignCheckout`, `PageDesignMyAccount` and search for:
 
@@ -178,9 +182,10 @@ Open templates: `PageDesignContent`, `PageDesignCheckout`, `PageDesignMyAccount`
     requireScripts( 'PageDesign$PageDesign', 'body', '{% GetGlobal('LayoutFolder'); %}/js/' );
 </script>
 ```
-**ATTENTION:** In each template you can find two similar occurrences of this snippet. Be sure that the value of the second parameter is `'body'`
 
-Add the following lines after each found occurrence:
+**ATTENTION:** In each template you will find two similar occurrences of this snippet. Make sure that the value of the second parameter is `'body'`.
+
+Add the following lines after each occurrence:
 
 ```html
 <script>
@@ -191,7 +196,8 @@ Add the following lines after each found occurrence:
     {% endif %}
 </script>
 ```
-**ATTENTION:** Do not wrap these calls in the same &lt;script&gt;-Tag. Be sure to have separate &lt;script&gt;-Tags for each call.
+
+**ATTENTION:** Do not wrap these calls in the same &lt;script&gt; tag. Be sure to have separate &lt;script&gt; tags for each call.
 
 
 Perform **Step 5** and **Step 6** as described above.
