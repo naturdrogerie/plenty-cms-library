@@ -524,7 +524,7 @@ PlentyFramework.cssClasses = {
             });
 
             if( modal.timeout > 0 ) {
-                startTimeout();
+                modal.startTimeout();
                 element.on('close.fndtn.reveal', '[data-reveal]', modal.stopTimeout);
                 element.hover(modal.pauseTimeout, function() {
                     modal.pauseTimeout();
@@ -1477,7 +1477,7 @@ PlentyFramework.cssClasses = {
          */
         function printErrors(errorMessages) {
             var errorContainer = $('body');
-            if ($('body').has('.alert-box-container')) {
+            if ($('body').has('.alert-box-container').length) {
               errorContainer = $('.alert-box-container').first();
             }
             // create error-popup if not exist

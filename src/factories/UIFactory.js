@@ -56,7 +56,7 @@
          */
         function printErrors(errorMessages) {
             var errorContainer = $('body');
-            if ($('body').has('.alert-box-container')) {
+            if ($('body').has('.alert-box-container').length) {
               errorContainer = $('.alert-box-container').first();
             }
             // create error-popup if not exist

@@ -13,7 +13,7 @@
             });
 
             if( modal.timeout > 0 ) {
-                startTimeout();
+                modal.startTimeout();
                 element.on('close.fndtn.reveal', '[data-reveal]', modal.stopTimeout);
                 element.hover(modal.pauseTimeout, function() {
                     modal.pauseTimeout();
