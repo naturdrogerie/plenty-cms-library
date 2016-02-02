@@ -52,14 +52,9 @@ module.exports = function( grunt )
                 unused      : true,
                 "join_vars" : true
             },
-<<<<<<< HEAD
-            options: {
-                banner:  '/**\n * Licensed under AGPL v3\n * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)\n * =====================================================================================\n * @copyright   Copyright (c) 2015, plentymarkets GmbH (http://www.plentymarkets.com)\n * Changes made by Die Naturdrogerie (https://www.naturdrogerie.de)\n * @author      Felix Dausch <felix.dausch@plentymarkets.com>\n * @author      Uwe Schürmann <uwe@naturdrogerie.de>\n * =====================================================================================\n*/'
-=======
             options : {
                 sourceMap: true,
-                banner   : '/**\n * Licensed under AGPL v3\n * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)\n * =====================================================================================\n * @copyright   Copyright (c) 2015, plentymarkets GmbH (http://www.plentymarkets.com)\n * @author      Felix Dausch <felix.dausch@plentymarkets.com>\n * =====================================================================================\n*/'
->>>>>>> plentymarkets/master
+                banner   : '/**\n * Licensed under AGPL v3\n * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)\n * =====================================================================================\n * @copyright   Copyright (c) 2015, plentymarkets GmbH (http://www.plentymarkets.com)\n * Changes made by Die Naturdrogerie (https://www.naturdrogerie.de)\n * @author      Felix Dausch <felix.dausch@plentymarkets.com>\n * @author      Uwe Schürmann <uwe@naturdrogerie.de>\n * =====================================================================================\n*/'
             },
             build   : {
                 src : 'debug/<%= pkg.name %>-<%= pkg.version %>.js',

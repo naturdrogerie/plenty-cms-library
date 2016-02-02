@@ -309,10 +309,5 @@
             return $.Deferred().resolve();
         }
 
-<<<<<<< HEAD
-    }, ['UIFactory']);
-}(jQuery, PlentyFramework));
-=======
     }, ['UIFactory', 'ModalFactory'] );
 }( jQuery, PlentyFramework ));
->>>>>>> plentymarkets/master

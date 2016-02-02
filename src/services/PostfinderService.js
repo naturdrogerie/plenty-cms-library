@@ -100,17 +100,17 @@
                             .setClass( 'checkout' )
                             .onConfirm( function()
                             {
-                                shippingFields.PostfinderItemCity.removeClass( 'has-error' ).addClass( 'has-success' );
-                                $( 'label[for="' + shippingFields.PostfinderItemCity.attr( 'id' ) + '"]' ).removeClass( 'has-error' ).addClass( 'has-success' );
+                                shippingFields.PostfinderItemCity.removeClass( 'error' ).addClass( 'success' );
+                                $( 'label[for="' + shippingFields.PostfinderItemCity.attr( 'id' ) + '"]' ).removeClass( 'error' ).addClass( 'success' );
 
-                                shippingFields.PostfinderItemZIP.removeClass( 'has-error' ).addClass( 'has-success' );
-                                $( 'label[for="' + shippingFields.PostfinderItemZIP.attr( 'id' ) + '"]' ).removeClass( 'has-error' ).addClass( 'has-success' );
+                                shippingFields.PostfinderItemZIP.removeClass( 'error' ).addClass( 'success' );
+                                $( 'label[for="' + shippingFields.PostfinderItemZIP.attr( 'id' ) + '"]' ).removeClass( 'error' ).addClass( 'success' );
 
-                                shippingFields.PostfinderItemStreet.removeClass( 'has-error' ).addClass( 'has-success' );
-                                $( 'label[for="' + shippingFields.PostfinderItemStreet.attr( 'id' ) + '"]' ).removeClass( 'has-error' ).addClass( 'has-success' );
+                                shippingFields.PostfinderItemStreet.removeClass( 'error' ).addClass( 'success' );
+                                $( 'label[for="' + shippingFields.PostfinderItemStreet.attr( 'id' ) + '"]' ).removeClass( 'error' ).addClass( 'success' );
 
-                                shippingFields.PostfinderItemHouseNo.removeClass( 'has-error' ).addClass( 'has-success' );
-                                $( 'label[for="' + shippingFields.PostfinderItemHouseNo.attr( 'id' ) + '"]' ).removeClass( 'has-error' ).addClass( 'has-success' );
+                                shippingFields.PostfinderItemHouseNo.removeClass( 'error' ).addClass( 'success' );
+                                $( 'label[for="' + shippingFields.PostfinderItemHouseNo.attr( 'id' ) + '"]' ).removeClass( 'error' ).addClass( 'success' );
 
                                 packstationID = $( 'input[type="radio"][name="postfinder"]:checked' ).val();
 
@@ -144,24 +144,24 @@
         {
             UIFactory.throwError( 0, pm.translate( 'Please enter a ZIP code and/or a city.' ) );
 
-            shippingFields.PostfinderItemCity.removeClass( 'has-success' ).addClass( 'has-error' );
-            $( 'label[for="' + shippingFields.PostfinderItemCity.attr( 'id' ) + '"]' ).removeClass( 'has-success' ).addClass( 'has-error' );
+            shippingFields.PostfinderItemCity.removeClass( 'success' ).addClass( 'error' );
+            $( 'label[for="' + shippingFields.PostfinderItemCity.attr( 'id' ) + '"]' ).removeClass( 'success' ).addClass( 'error' );
 
-            shippingFields.PostfinderItemZIP.removeClass( 'has-success' ).addClass( 'has-error' );
-            $( 'label[for="' + shippingFields.PostfinderItemZIP.attr( 'id' ) + '"]' ).removeClass( 'has-success' ).addClass( 'has-error' );
+            shippingFields.PostfinderItemZIP.removeClass( 'success' ).addClass( 'error' );
+            $( 'label[for="' + shippingFields.PostfinderItemZIP.attr( 'id' ) + '"]' ).removeClass( 'success' ).addClass( 'error' );
 
             shippingFields.PostfinderItemCity.focus( function()
             {
-                $( this ).removeClass( 'has-error' );
+                $( this ).removeClass( 'error' );
                 var inputId = $( this ).attr( 'id' );
-                $( this ).closest( '.form-group' ).find( '[for="' + inputId + '"]' ).removeClass( 'has-error' );
+                $( this ).closest( '.form-group' ).find( '[for="' + inputId + '"]' ).removeClass( 'error' );
             } );
 
             shippingFields.PostfinderItemZIP.focus( function()
             {
-                $( this ).removeClass( 'has-error' );
+                $( this ).removeClass( 'error' );
                 var inputId = $( this ).attr( 'id' );
-                $( this ).closest( '.form-group' ).find( '[for="' + inputId + '"]' ).removeClass( 'has-error' );
+                $( this ).closest( '.form-group' ).find( '[for="' + inputId + '"]' ).removeClass( 'error' );
             } );
         }
     }, ['APIFactory', 'ModalFactory', 'UIFactory'] );

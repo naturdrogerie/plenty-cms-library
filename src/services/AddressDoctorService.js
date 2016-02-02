@@ -83,19 +83,19 @@
 
                 if ( suggestions.houseNoAllowed( $inputs.HouseNo.val() ) || suggestions.getAddresses().length == 1 )
                 {
-                    $inputs.HouseNo.removeClass( 'has-error' );
-                    $form.find( 'label[for="' + $inputs.HouseNo.attr( 'id' ) + '"]' ).removeClass( 'has-error' );
+                    $inputs.HouseNo.removeClass( 'error' );
+                    $form.find( 'label[for="' + $inputs.HouseNo.attr( 'id' ) + '"]' ).removeClass( 'error' );
 
-                    $inputs.HouseNo.addClass( 'has-success' );
-                    $form.find( 'label[for="' + $inputs.HouseNo.attr( 'id' ) + '"]' ).addClass( 'has-success' );
+                    $inputs.HouseNo.addClass( 'success' );
+                    $form.find( 'label[for="' + $inputs.HouseNo.attr( 'id' ) + '"]' ).addClass( 'success' );
                 }
                 else
                 {
-                    $inputs.HouseNo.removeClass( 'has-success' );
-                    $form.find( 'label[for="' + $inputs.HouseNo.attr( 'id' ) + '"]' ).removeClass( 'has-success' );
+                    $inputs.HouseNo.removeClass( 'success' );
+                    $form.find( 'label[for="' + $inputs.HouseNo.attr( 'id' ) + '"]' ).removeClass( 'success' );
 
-                    $inputs.HouseNo.addClass( 'has-error' );
-                    $form.find( 'label[for="' + $inputs.HouseNo.attr( 'id' ) + '"]' ).addClass( 'has-error' );
+                    $inputs.HouseNo.addClass( 'error' );
+                    $form.find( 'label[for="' + $inputs.HouseNo.attr( 'id' ) + '"]' ).addClass( 'error' );
                 }
             }
 
@@ -117,20 +117,20 @@
                 {
                     $inputs[key].val( valueList[0] );
 
-                    $inputs[key].removeClass( 'has-error' );
-                    $form.find( 'label[for="' + $inputs[key].attr( 'id' ) + '"]' ).removeClass( 'has-error' );
+                    $inputs[key].removeClass( 'error' );
+                    $form.find( 'label[for="' + $inputs[key].attr( 'id' ) + '"]' ).removeClass( 'error' );
 
-                    $inputs[key].addClass( 'has-success' );
-                    $form.find( 'label[for="' + $inputs[key].attr( 'id' ) + '"]' ).addClass( 'has-success' );
+                    $inputs[key].addClass( 'success' );
+                    $form.find( 'label[for="' + $inputs[key].attr( 'id' ) + '"]' ).addClass( 'success' );
                     return true;
                 }
                 else
                 {
-                    $inputs[key].removeClass( 'has-success' );
-                    $form.find( 'label[for="' + $inputs[key].attr( 'id' ) + '"]' ).removeClass( 'has-success' );
+                    $inputs[key].removeClass( 'success' );
+                    $form.find( 'label[for="' + $inputs[key].attr( 'id' ) + '"]' ).removeClass( 'success' );
 
-                    $inputs[key].addClass( 'has-error' );
-                    $form.find( 'label[for="' + $inputs[key].attr( 'id' ) + '"]' ).addClass( 'has-error' );
+                    $inputs[key].addClass( 'error' );
+                    $form.find( 'label[for="' + $inputs[key].attr( 'id' ) + '"]' ).addClass( 'error' );
 
                     if ( !suggestionListVisible )
                     {
