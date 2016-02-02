@@ -28,45 +28,27 @@ TemplateCache["error/errorMessage.html"] = "<div class=\"plentyErrorBoxContent\"
    "</div>\n" +
    "";
 
-TemplateCache["error/errorPopup.html"] = "<div class=\"plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
-   "    <button class=\"close\" type=\"button\"><span aria-hidden=\"true\">×</span>\n" +
-   "        <span class=\"sr-only\">{{#translate}}Close{{/translate}}</span>\n" +
-   "    </button>\n" +
-   "    <div class=\"plentyErrorBoxInner\">\n" +
-   "    </div>\n" +
+TemplateCache["error/errorPopup.html"] = "<div data-alert class=\"alert-box alert radius plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
+   "  <div class=\"plentyErrorBoxInner\">\n" +
+   "  </div>\n" +
+   "  <button tabindex=\"0\" class=\"close\" aria-label=\"{{#translate}}Close{{/translate}}\">&times;</button>\n" +
    "</div>\n" +
    "";
 
-TemplateCache["modal/modal.html"] = "<div class=\"modal fade\">\n" +
-   "    <div class=\"modal-dialog\">\n" +
-   "        <div class=\"modal-content\">\n" +
+TemplateCache["modal/modal.html"] = "<div class=\"reveal-modal medium\" data-reveal aria-labelledby=\"modalTitle{{uid}}\" aria-hidden=\"true\" role=\"dialog\">\n" +
+   "    {{#title}}\n" +
+   "    <h2 id=\"modalTitle{{uid}}\">{{{title}}}</h2>\n" +
+   "    {{/title}}\n" +
    "\n" +
-   "            {{#title}}\n" +
-   "            <div class=\"modal-header\">\n" +
-   "                <button class=\"close\" type=\"button\" data-dismiss=\"modal\" aria-label=\"{{#translate}}Close{{/translate}}\">\n" +
-   "                    <span aria-hidden=\"true\">&times;</span>\n" +
-   "                </button>\n" +
-   "                <h4 class=\"modal-title\">{{{title}}}</h4>\n" +
-   "            </div>\n" +
-   "            {{/title}}\n" +
+   "    {{{content}}}\n" +
    "\n" +
-   "            <div class=\"modal-body\">{{{content}}}</div>\n" +
-   "\n" +
-   "            <div class=\"modal-footer\">\n" +
-   "\n" +
-   "                {{#labelDismiss}}\n" +
-   "                <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">\n" +
-   "                    <span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>{{labelDismiss}}\n" +
-   "                </button>\n" +
-   "                {{/labelDismiss}}\n" +
-   "\n" +
-   "                <button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" data-plenty-modal=\"confirm\">\n" +
-   "                    <span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span>{{labelConfirm}}\n" +
-   "                </button>\n" +
-   "            </div>\n" +
-   "        </div>\n" +
-   "    </div>\n" +
-   "</div>";
+   "    <button type=\"button\" class=\"button right\" data-dismiss=\"modal\" data-plenty-modal=\"confirm\">{{labelConfirm}}</button>\n" +
+   "    {{#labelDismiss}}\n" +
+   "    <button type=\"button\" class=\"button info\" data-dismiss=\"modal\">{{labelDismiss}}</button>\n" +
+   "    {{/labelDismiss}}\n" +
+   "    <a class=\"close-reveal-modal\" aria-label=\"{{#translate}}Close{{/translate}}\">&#215;</a>\n" +
+   "</div>\n" +
+   "";
 
 TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" class=\"overlay overlay-wait\"></div>";
 
@@ -457,17 +439,21 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             }
         }
 
-        var scripts = document.getElementsByTagName( 'SCRIPT' );
-        if( scripts.length > 0 ) {
-            PlentyFramework.scriptPath = scripts[ scripts.length - 1 ].src.match( /(.*)\/(.*)\.js(\?\S*)?$/ )[ 1 ];
+        // opportunity to insert a script path manually through defining
+        // data-plenty-script-path on a DOM element (i.e. a script tag)
+        if ($('[data-plenty-script-path]').length > 0) {
+          PlentyFramework.scriptPath = $('[data-plenty-script-path]').first().data('data-plenty-script-path');
+        }
+        else {
+          var scripts = document.getElementsByTagName( 'SCRIPT' );
+          if( scripts.length > 0 ) {
+              PlentyFramework.scriptPath = scripts[ scripts.length - 1 ].src.match( /(.*)\/(.*)\.js(\?\S*)?$/ )[ 1 ];
+          }
         }
 
     };
 
 }(jQuery));
-
-
-
 
 PlentyFramework.cssClasses = {
 
@@ -523,17 +509,18 @@ PlentyFramework.cssClasses = {
          * @param {Modal} modal         The instance of the current modal
          */
         init: function ( element, modal ) {
-            element.on( 'hidden.bs.modal', function () {
+            element.on('closed.fndtn.reveal', '[data-reveal]', function () {
                 modal.hide();
-                element.remove();
             });
 
-            if ( modal.timeout > 0 ) {
-                element.on( 'hide.bs.modal', modal.stopTimeout );
-                element.find( '.modal-content' ).hover( function() {
+            if( modal.timeout > 0 ) {
+                modal.startTimeout();
+                element.on('close.fndtn.reveal', '[data-reveal]', modal.stopTimeout);
+                element.hover(modal.pauseTimeout, function() {
                     modal.pauseTimeout();
                 }, function () {
-                    if ( element.is( '.in' ) ) {
+                    if( element.is('.open') )
+                    {
                         modal.continueTimeout();
                     }
                 });
@@ -545,7 +532,7 @@ PlentyFramework.cssClasses = {
          * @param {HTMLElement} element The injected modal element
          */
         show: function ( element ) {
-            element.modal( 'show' );
+            element.foundation('reveal','open');
         },
 
         /**
@@ -553,7 +540,7 @@ PlentyFramework.cssClasses = {
          * @param {HTMLElement} element The injected modal element
          */
         hide: function ( element ) {
-            element.modal( 'hide' );
+            element.foundation('reveal', 'close');
         },
 
         /**
@@ -562,7 +549,7 @@ PlentyFramework.cssClasses = {
          * @returns {boolean}   true if a modal was found
          */
         isModal: function ( html ) {
-            return $( html ).filter( '.modal' ).length + $( html ).find( '.modal' ).length > 0;
+            return $(html).filter('.reveal-modal' ).length + $(html).find('.reveal-modal' ).length > 0;
         },
 
         /**
@@ -573,7 +560,7 @@ PlentyFramework.cssClasses = {
         getModal: function ( html ) {
             var modal = $( html );
             if ( modal.length > 1 ) {
-                modal = $( html ).filter( '.modal' ) || $( html ).find( '.modal' );
+                modal = $( html ).filter( '.reveal-modal' ) || $( html ).find( '.reveal-modal' );
             }
 
             return modal;
@@ -581,6 +568,7 @@ PlentyFramework.cssClasses = {
     };
 
 }(jQuery, PlentyFramework));
+
 (function($, pm) {
 
     pm.partials.WaitScreen = {
@@ -795,6 +783,7 @@ PlentyFramework.cssClasses = {
 
     }, ['UIFactory']);
 }(jQuery, PlentyFramework));
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
@@ -1107,6 +1096,14 @@ PlentyFramework.cssClasses = {
         function Modal() {
 
             var modal = this;
+						/**
+             * The UID of the modal
+             * @attribute uid
+             * @type {string}
+             * @private
+             * @default ""
+             */
+            modal.title      = '';
             /**
              * The title of the modal
              * @attribute title
@@ -1304,6 +1301,7 @@ PlentyFramework.cssClasses = {
                 if( isModal( modal.content ) ) {
                     bsModal = PlentyFramework.partials.Modal.getModal( modal.content );
                 } else {
+										modal.uid = '_' + Math.random().toString(36).substr(2, 9);
                     bsModal = $( PlentyFramework.compileTemplate('modal/modal.html', modal) );
                 }
 
@@ -1414,6 +1412,7 @@ PlentyFramework.cssClasses = {
 
 	});
 }(jQuery, PlentyFramework));
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
@@ -1471,11 +1470,14 @@ PlentyFramework.cssClasses = {
          * @param {Array} errorMessages A list of errors to display
          */
         function printErrors(errorMessages) {
-
+            var errorContainer = $('body');
+            if ($('body').has('.alert-box-container').length) {
+              errorContainer = $('.alert-box-container').first();
+            }
             // create error-popup if not exist
-            if( !errorPopup || $('body').has(errorPopup ).length <= 0 ) {
+            if( !errorPopup || errorContainer.has(errorPopup ).length <= 0 ) {
                 errorPopup = $( pm.compileTemplate('error/errorPopup.html') );
-                $('body').append( errorPopup );
+                errorContainer.append( errorPopup );
                 pm.partials.Error.init( errorPopup );
             }
 
@@ -1533,6 +1535,7 @@ PlentyFramework.cssClasses = {
 
     });
 }(jQuery, PlentyFramework));
+
 /**
  * Factories provide static functions and can be injected into
  * {{#crossLinkModule "Services"}}services{{/crossLinkModule}}.<br>
@@ -2072,16 +2075,7 @@ PlentyFramework.cssClasses = {
                 API.post("/rest/checkout/basketitemslist/", params)
                     .done(function () {
                         Checkout.setCheckout().done(function () {
-                            Checkout.reloadContainer('Totals');
-
-                            var basketItemsPriceTotal = 0;
-                            var params2 = Checkout.getCheckout().BasketItemsList;
-                            for (var i = 0; i < params2.length; i++) {
-                                if (params2[i].BasketItemID == BasketItemID) {
-                                    basketItemsPriceTotal = params2[i].BasketItemPriceTotal;
-                                }
-                            }
-                            $('[data-basket-item-id="' + BasketItemID + '"]').find('[data-plenty-checkout="basket-item-price-total"]').html(basketItemsPriceTotal);
+                            Checkout.reloadCatContent( pm.getGlobal( 'basketCatID' ) );
                             refreshBasketPreview();
                         });
                     });
@@ -2274,7 +2268,7 @@ PlentyFramework.cssClasses = {
             var shippingAddressID = $('[name="shippingAddressID"]:checked').val();
 
             // TODO: move bootstrap specific function
-            $('#shippingAdressSelect').modal('hide');
+            $('#shippingAdressSelect').foundation('reveal', 'close');
 
             if ( shippingAddressID < 0) {
                 // save separate
@@ -2643,133 +2637,7 @@ PlentyFramework.cssClasses = {
 
 	}, ['APIFactory', 'CMSFactory', 'CheckoutFactory', 'ModalFactory']);
 }(jQuery, PlentyFramework));
-/**
- * Licensed under AGPL v3
- * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
- * =====================================================================================
- * @copyright   Copyright (c) 2015, plentymarkets GmbH (http://www.plentymarkets.com)
- * @author      Felix Dausch <felix.dausch@plentymarkets.com>
- * =====================================================================================
- */
 
-/**
- * @module Services
- */
-(function($, pm) {
-
-    pm.service('FeedbackService', function( API ) {
-
-        return {
-            getFeedbacks: getFeedbacks,
-            addFeedback: addFeedback,
-            ArticleTypes: articleTypes(),
-            FeedbackTypes: feedbackTypes()
-        };
-
-        /*
-        FeedbackService
-            .getFeedbacks().between('2014-12-03', '2015-07-01')
-            .for( FeedbackService.ArticleTypes.ITEM, 2732, FeedbackService.FeedbackTypes.COMMENTS_ONLY );
-        */
-        function getFeedbacks() {
-            var feedbackInterval = {
-                dateStart: null,
-                dateEnd: null
-            };
-
-            return {
-                between: setFeedbackInterval,
-                for: listFeedbacks
-            };
-
-            function setFeedbackInterval( start, end ) {
-                feedbackInterval.dateStart = start;
-                feedbackInterval.dateEnd = end;
-                return this;
-            }
-
-            function listFeedbacks( articleType, referenceId, feedbackType ) {
-
-                var params = {
-                    ReferenceId: referenceId,
-                    FromDate: feedbackInterval.dateStart,
-                    ToDate: feedbackInterval.dateEnd,
-                    FeedbackType: feedbackType || feedbackTypes().COMMENTS_AND_RATINGS
-                };
-                return API.get( '/rest/feedback/'+articleType+'/', params );
-
-            }
-        }
-
-        /*
-        FeedbackService
-            .addFeedback()
-            .withRating( 5 )
-            .withComment( 'Hallo' )
-            .withAuthor( 'Felix', 'felix.dausch@plentymarkets.com', 123456 )
-            .to( FeedbackService.ArticleTypes.ITEM, 2732 );
-        */
-        function addFeedback() {
-
-            var params = {
-                Rating: 1.0,
-                Text: '',
-                Author: '',
-                Email: '',
-                CustomerId: 0
-            };
-
-            return {
-                withRating: withRating,
-                withComment: withComment,
-                withAuthor: withAuthor,
-                to: sendFeedback
-            };
-
-            function withRating( rating ) {
-                params.Rating = rating;
-                return this;
-            }
-
-            function withComment( comment ) {
-                params.Text = comment;
-                return this;
-            }
-
-            function withAuthor( author, mail, customerID ) {
-                params.Author = author;
-                if( !!mail ) params.Email = mail;
-                if( !!customerID ) params.CustomerId = customerID;
-                return this;
-            }
-
-            function sendFeedback( articleType, referenceId ) {
-                return API.post( '/rest/feedback/'+articleType+'/', params );
-
-            }
-
-        }
-
-        function feedbackTypes() {
-            return {
-                COMMENTS_ONLY:          'comments_only',
-                RATINGS_ONLY:           'ratings_only',
-                COMMENTS_AND_RATINGS:   'comments_with_ratings'
-            }
-        }
-
-        function articleTypes() {
-            return {
-                ITEM:       'item',
-                CATEGORY:   'category',
-                BLOG:       'blog'
-            }
-        }
-
-
-
-    }, ['APIFactory']);
-}(jQuery, PlentyFramework));
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
@@ -3241,6 +3109,8 @@ PlentyFramework.cssClasses = {
          * @function fillNavigation
          */
         function fillNavigation() {
+            // function not needed because of some nice css.
+            return;
             // break if manager has not been initialized
             var navigationCount = navigation.length;
             if( navigationCount <= 0 ) return;
@@ -3313,6 +3183,7 @@ PlentyFramework.cssClasses = {
     }, ['CMSFactory', 'CheckoutFactory']);
 
 }(jQuery, PlentyFramework));
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
@@ -3623,7 +3494,7 @@ PlentyFramework.cssClasses = {
         function validate( form ) {
             var formControl, formControls, validationKey, currentHasError, group, checked, checkedMin, checkedMax, attrValidate, validationKeys, formControlAttrType;
             var wrappedForm = $(form);
-            var errorClass = !!wrappedForm.attr('data-plenty-checkform') ? wrappedForm.attr('data-plenty-checkform') : 'has-error';
+            var errorClass = !!wrappedForm.attr('data-plenty-checkform') ? wrappedForm.attr('data-plenty-checkform') : 'error';
             var missingFields = [];
             var hasError = false;
 
@@ -3721,7 +3592,7 @@ PlentyFramework.cssClasses = {
             // scroll to element on 'validationFailed'
             wrappedForm.on('validationFailed', function() {
                 var distanceTop = 50;
-                var errorOffset = wrappedForm.find('.has-error').first().offset().top;
+                var errorOffset = wrappedForm.find(errorClass).first().offset().top;
                 var scrollTarget = $('html, body');
 
                 // if form is inside of modal, scroll modal instead of body
@@ -3741,7 +3612,7 @@ PlentyFramework.cssClasses = {
 
             if ( hasError ) {
                 // remove error class on focus
-                wrappedForm.find('.has-error').each(function(i, elem) {
+                wrappedForm.find(errorClass).each(function(i, elem) {
                     formControl = $(getFormControl(elem));
                     formControl.on('focus click', function() {
                         formControl.removeClass( errorClass );
@@ -3834,6 +3705,7 @@ PlentyFramework.cssClasses = {
         return values;
     }
 }(jQuery, PlentyFramework));
+
 /**
  * Services provide functions to be called from the instanced PlentyFramework.<br>
  * Services can inject Factories and can be injected into Directives. The are also
@@ -3977,81 +3849,18 @@ PlentyFramework.cssClasses = {
      * </div>
      */
     pm.directive('[data-plenty="contentpageSlider"]', function(i, elem) {
-        $(elem).owlCarousel({
-            navigation: true,
-            navigationText: false,
-            slideSpeed: 1000,
-            paginationSpeed: 1000,
-            singleItem: true,
-            autoPlay: 6000,
-            stopOnHover: true,
-            afterMove: function(current) { $(current).find('img[data-plenty-lazyload]').trigger('appear'); }
-        });
+        $(elem).slick({
+    			  lazyLoad: 'ondemand',
+    			  slidesToScroll: 1,
+    			  autoplay: true,
+    			  autoplaySpeed: 10000,
+    			  dots: true,
+    			  speed: 400
+  			});
     });
 
 }(jQuery, PlentyFramework));
-/**
- * Licensed under AGPL v3
- * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
- * =====================================================================================
- * @copyright   Copyright (c) 2015, plentymarkets GmbH (http://www.plentymarkets.com)
- * @author      Felix Dausch <felix.dausch@plentymarkets.com>
- * =====================================================================================
- */
 
-(function($, pm) {
-
-    /*
-     * Equal Box heights
-     */
-    pm.directive('[data-plenty-equal]', function(i, elem, MediaSizeService) {
-        var mediaSizes = $(elem).data('plenty-equal').replace(/\s/g, '').split(',');
-
-        var targets = ( $(elem).find('[data-plenty-equal-target]').length > 0 ) ? $(elem).find('[data-plenty-equal-target]') : $(elem).children();
-
-        var maxHeight = 0;
-        $(targets).each(function(j, child) {
-
-            $(child).css('height', '');
-
-            if( $(child).outerHeight(true) > maxHeight ) {
-                maxHeight = $(child).outerHeight(true);
-            }
-        });
-
-        if( !mediaSizes || $.inArray( MediaSizeService.interval(), mediaSizes ) >= 0 ) targets.height(maxHeight);
-
-    }, ['MediaSizeService'], true);
-
-    // refresh calculation on window resize
-    $(window).on('sizeChange', function() {
-        pm.getInstance().bindDirectives( '[data-plenty-equal]' );
-    });
-
-}(jQuery, PlentyFramework));
-/**
- * Licensed under AGPL v3
- * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
- * =====================================================================================
- * @copyright   Copyright (c) 2015, plentymarkets GmbH (http://www.plentymarkets.com)
- * @author      Felix Dausch <felix.dausch@plentymarkets.com>
- * =====================================================================================
- */
-
-(function($, pm) {
-
-    // lazyload images (requires lazyload.min.js)
-    // TODO: handle external dependencies dependencies
-    pm.directive('img[data-plenty-lazyload]', function(i, elem) {
-        $(elem).lazyload({
-            effect: $(this).attr('data-plenty-lazyload')
-        });
-        $(elem).on("loaded", function() {
-            $(elem).css('display', 'inline-block');
-        });
-    });
-
-}(jQuery, PlentyFramework));
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
@@ -4160,14 +3969,13 @@ PlentyFramework.cssClasses = {
     }, ['MediaSizeService']);
 
     $(document).ready(function() {
-
         if ( pm.getInstance().MediaSizeService.interval() != 'xs' && pm.getInstance().MediaSizeService.interval() != 'sm' && Modernizr.touch ) {
             $('.dropdown.open > a[data-plenty-enable="touch"]').parent().removeClass('open');
         }
-
     });
 
 }(jQuery, PlentyFramework));
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
@@ -4649,6 +4457,7 @@ PlentyFramework.cssClasses = {
     }, ['MediaSizeService']);
 
 }(jQuery, PlentyFramework));
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
