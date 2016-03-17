@@ -13,8 +13,12 @@
             element.on('closed.fndtn.reveal', '[data-reveal]', function ()
             {
                 modal.hide();
-                // element.remove();
-            });
+                if( !modal.selector )
+                {
+                    //Do not remove static modals
+                    // element.remove();
+                }
+            } );
 
             if( modal.timeout > 0 )
             {

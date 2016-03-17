@@ -162,10 +162,15 @@
                             CMS.getContainer( 'ItemViewItemToBasketConfirmationOverlay', {ArticleID: article[0].BasketItemItemID} ).from( 'ItemView' )
                                 .done( function( response )
                                 {
-                                    Modal.prepare()
-                                        .setContent( response.data[0] )
-                                        .setTimeout( 5000 )
-                                        .show();
+                                    var timeout = pm.getGlobal( 'TimeoutItemToBasketOverlay', 5000 );
+                                    var modal   = Modal.prepare().setContent( response.data[0] );
+
+                                    if ( timeout > 0 )
+                                    {
+                                        modal.setTimeout( timeout );
+                                    }
+
+                                    modal.show();
                                 } );
                         } );
                 } ).fail( function( jqXHR )
@@ -228,7 +233,7 @@
 
             var match = $input[0].name.match( /^ParamValueFile\[(\d+)]\[(\d+)]$/ );
 
-            return addOrderParamValue( articleWithParams, match[1], match[2], $input.val() );
+            return addOrderParamValue( articleWithParams, match[1], match[2], orderParamUploadFiles[key][0]['name'] );
         }
 
         /**
@@ -377,7 +382,7 @@
                     {
                         Checkout.loadCheckout().done( function()
                         {
-                            $( '[data-basket-item-id="' + BasketItemID + '"]' ).remove();
+                            //$( '[data-basket-item-id="' + BasketItemID + '"]' ).remove();
 
                             if ( !Checkout.getCheckout().BasketItemsList || Checkout.getCheckout().BasketItemsList.length <= 0 )
                             {
@@ -385,6 +390,26 @@
                             }
                             else
                             {
+                                // FALLBACK if design not support selector
+                                // [data-plenty-checkout-template="BasketItemsList"]
+                                if ( $( '[data-plenty-checkout-template="BasketItemsList"]' ).length >= 0 )
+                                {
+                                    API.get( "/rest/checkout/container_checkoutbasketitemslist/" ).done( function( response )
+                                    {
+                                        var $oldBasketList       = $( '[data-basket-item-id]' ).parents( "ul" );
+                                        var $basketListContainer = $oldBasketList.parents( ".panel-body" );
+                                        $oldBasketList.fadeOut( function()
+                                        {
+                                            $( this ).siblings( ":not('[data-plenty-checkout-template]')" ).remove();
+                                            $( this ).remove();
+                                            $basketListContainer.prepend( $( response.data[0] ) ).hide().fadeIn();
+                                        } );
+                                    } );
+                                }
+                                else
+                                {
+                                    Checkout.reloadContainer( 'BasketItemsList' );
+                                }
                                 Checkout.reloadContainer( 'Totals' );
                             }
 
