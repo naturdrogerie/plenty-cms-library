@@ -1,553 +1,6 @@
-(function defineMustache( global, factory )
-{
-    if ( typeof exports === "object" && exports && typeof exports.nodeName !== "string" )
-    {
-        factory( exports )
-    }
-    else if ( typeof define === "function" && define.amd )
-    {
-        define( ["exports"], factory )
-    }
-    else
-    {
-        global.Mustache = {};
-        factory( Mustache )
-    }
-})( this, function mustacheFactory( mustache )
-{
-    var objectToString = Object.prototype.toString;
-    var isArray        = Array.isArray || function isArrayPolyfill( object )
-        {
-            return objectToString.call( object ) === "[object Array]"
-        };
+(function defineMustache(global,factory){if(typeof exports==="object"&&exports&&typeof exports.nodeName!=="string"){factory(exports)}else if(typeof define==="function"&&define.amd){define(["exports"],factory)}else{global.Mustache={};factory(Mustache)}})(this,function mustacheFactory(mustache){var objectToString=Object.prototype.toString;var isArray=Array.isArray||function isArrayPolyfill(object){return objectToString.call(object)==="[object Array]"};function isFunction(object){return typeof object==="function"}function typeStr(obj){return isArray(obj)?"array":typeof obj}function escapeRegExp(string){return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g,"\\$&")}function hasProperty(obj,propName){return obj!=null&&typeof obj==="object"&&propName in obj}var regExpTest=RegExp.prototype.test;function testRegExp(re,string){return regExpTest.call(re,string)}var nonSpaceRe=/\S/;function isWhitespace(string){return!testRegExp(nonSpaceRe,string)}var entityMap={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;","/":"&#x2F;"};function escapeHtml(string){return String(string).replace(/[&<>"'\/]/g,function fromEntityMap(s){return entityMap[s]})}var whiteRe=/\s*/;var spaceRe=/\s+/;var equalsRe=/\s*=/;var curlyRe=/\s*\}/;var tagRe=/#|\^|\/|>|\{|&|=|!/;function parseTemplate(template,tags){if(!template)return[];var sections=[];var tokens=[];var spaces=[];var hasTag=false;var nonSpace=false;function stripSpace(){if(hasTag&&!nonSpace){while(spaces.length)delete tokens[spaces.pop()]}else{spaces=[]}hasTag=false;nonSpace=false}var openingTagRe,closingTagRe,closingCurlyRe;function compileTags(tagsToCompile){if(typeof tagsToCompile==="string")tagsToCompile=tagsToCompile.split(spaceRe,2);if(!isArray(tagsToCompile)||tagsToCompile.length!==2)throw new Error("Invalid tags: "+tagsToCompile);openingTagRe=new RegExp(escapeRegExp(tagsToCompile[0])+"\\s*");closingTagRe=new RegExp("\\s*"+escapeRegExp(tagsToCompile[1]));closingCurlyRe=new RegExp("\\s*"+escapeRegExp("}"+tagsToCompile[1]))}compileTags(tags||mustache.tags);var scanner=new Scanner(template);var start,type,value,chr,token,openSection;while(!scanner.eos()){start=scanner.pos;value=scanner.scanUntil(openingTagRe);if(value){for(var i=0,valueLength=value.length;i<valueLength;++i){chr=value.charAt(i);if(isWhitespace(chr)){spaces.push(tokens.length)}else{nonSpace=true}tokens.push(["text",chr,start,start+1]);start+=1;if(chr==="\n")stripSpace()}}if(!scanner.scan(openingTagRe))break;hasTag=true;type=scanner.scan(tagRe)||"name";scanner.scan(whiteRe);if(type==="="){value=scanner.scanUntil(equalsRe);scanner.scan(equalsRe);scanner.scanUntil(closingTagRe)}else if(type==="{"){value=scanner.scanUntil(closingCurlyRe);scanner.scan(curlyRe);scanner.scanUntil(closingTagRe);type="&"}else{value=scanner.scanUntil(closingTagRe)}if(!scanner.scan(closingTagRe))throw new Error("Unclosed tag at "+scanner.pos);token=[type,value,start,scanner.pos];tokens.push(token);if(type==="#"||type==="^"){sections.push(token)}else if(type==="/"){openSection=sections.pop();if(!openSection)throw new Error('Unopened section "'+value+'" at '+start);if(openSection[1]!==value)throw new Error('Unclosed section "'+openSection[1]+'" at '+start)}else if(type==="name"||type==="{"||type==="&"){nonSpace=true}else if(type==="="){compileTags(value)}}openSection=sections.pop();if(openSection)throw new Error('Unclosed section "'+openSection[1]+'" at '+scanner.pos);return nestTokens(squashTokens(tokens))}function squashTokens(tokens){var squashedTokens=[];var token,lastToken;for(var i=0,numTokens=tokens.length;i<numTokens;++i){token=tokens[i];if(token){if(token[0]==="text"&&lastToken&&lastToken[0]==="text"){lastToken[1]+=token[1];lastToken[3]=token[3]}else{squashedTokens.push(token);lastToken=token}}}return squashedTokens}function nestTokens(tokens){var nestedTokens=[];var collector=nestedTokens;var sections=[];var token,section;for(var i=0,numTokens=tokens.length;i<numTokens;++i){token=tokens[i];switch(token[0]){case"#":case"^":collector.push(token);sections.push(token);collector=token[4]=[];break;case"/":section=sections.pop();section[5]=token[2];collector=sections.length>0?sections[sections.length-1][4]:nestedTokens;break;default:collector.push(token)}}return nestedTokens}function Scanner(string){this.string=string;this.tail=string;this.pos=0}Scanner.prototype.eos=function eos(){return this.tail===""};Scanner.prototype.scan=function scan(re){var match=this.tail.match(re);if(!match||match.index!==0)return"";var string=match[0];this.tail=this.tail.substring(string.length);this.pos+=string.length;return string};Scanner.prototype.scanUntil=function scanUntil(re){var index=this.tail.search(re),match;switch(index){case-1:match=this.tail;this.tail="";break;case 0:match="";break;default:match=this.tail.substring(0,index);this.tail=this.tail.substring(index)}this.pos+=match.length;return match};function Context(view,parentContext){this.view=view;this.cache={".":this.view};this.parent=parentContext}Context.prototype.push=function push(view){return new Context(view,this)};Context.prototype.lookup=function lookup(name){var cache=this.cache;var value;if(cache.hasOwnProperty(name)){value=cache[name]}else{var context=this,names,index,lookupHit=false;while(context){if(name.indexOf(".")>0){value=context.view;names=name.split(".");index=0;while(value!=null&&index<names.length){if(index===names.length-1)lookupHit=hasProperty(value,names[index]);value=value[names[index++]]}}else{value=context.view[name];lookupHit=hasProperty(context.view,name)}if(lookupHit)break;context=context.parent}cache[name]=value}if(isFunction(value))value=value.call(this.view);return value};function Writer(){this.cache={}}Writer.prototype.clearCache=function clearCache(){this.cache={}};Writer.prototype.parse=function parse(template,tags){var cache=this.cache;var tokens=cache[template];if(tokens==null)tokens=cache[template]=parseTemplate(template,tags);return tokens};Writer.prototype.render=function render(template,view,partials){var tokens=this.parse(template);var context=view instanceof Context?view:new Context(view);return this.renderTokens(tokens,context,partials,template)};Writer.prototype.renderTokens=function renderTokens(tokens,context,partials,originalTemplate){var buffer="";var token,symbol,value;for(var i=0,numTokens=tokens.length;i<numTokens;++i){value=undefined;token=tokens[i];symbol=token[0];if(symbol==="#")value=this.renderSection(token,context,partials,originalTemplate);else if(symbol==="^")value=this.renderInverted(token,context,partials,originalTemplate);else if(symbol===">")value=this.renderPartial(token,context,partials,originalTemplate);else if(symbol==="&")value=this.unescapedValue(token,context);else if(symbol==="name")value=this.escapedValue(token,context);else if(symbol==="text")value=this.rawValue(token);if(value!==undefined)buffer+=value}return buffer};Writer.prototype.renderSection=function renderSection(token,context,partials,originalTemplate){var self=this;var buffer="";var value=context.lookup(token[1]);function subRender(template){return self.render(template,context,partials)}if(!value)return;if(isArray(value)){for(var j=0,valueLength=value.length;j<valueLength;++j){buffer+=this.renderTokens(token[4],context.push(value[j]),partials,originalTemplate)}}else if(typeof value==="object"||typeof value==="string"||typeof value==="number"){buffer+=this.renderTokens(token[4],context.push(value),partials,originalTemplate)}else if(isFunction(value)){if(typeof originalTemplate!=="string")throw new Error("Cannot use higher-order sections without the original template");value=value.call(context.view,originalTemplate.slice(token[3],token[5]),subRender);if(value!=null)buffer+=value}else{buffer+=this.renderTokens(token[4],context,partials,originalTemplate)}return buffer};Writer.prototype.renderInverted=function renderInverted(token,context,partials,originalTemplate){var value=context.lookup(token[1]);if(!value||isArray(value)&&value.length===0)return this.renderTokens(token[4],context,partials,originalTemplate)};Writer.prototype.renderPartial=function renderPartial(token,context,partials){if(!partials)return;var value=isFunction(partials)?partials(token[1]):partials[token[1]];if(value!=null)return this.renderTokens(this.parse(value),context,partials,value)};Writer.prototype.unescapedValue=function unescapedValue(token,context){var value=context.lookup(token[1]);if(value!=null)return value};Writer.prototype.escapedValue=function escapedValue(token,context){var value=context.lookup(token[1]);if(value!=null)return mustache.escape(value)};Writer.prototype.rawValue=function rawValue(token){return token[1]};mustache.name="mustache.js";mustache.version="2.1.3";mustache.tags=["{{","}}"];var defaultWriter=new Writer;mustache.clearCache=function clearCache(){return defaultWriter.clearCache()};mustache.parse=function parse(template,tags){return defaultWriter.parse(template,tags)};mustache.render=function render(template,view,partials){if(typeof template!=="string"){throw new TypeError('Invalid template! Template should be a "string" '+'but "'+typeStr(template)+'" was given as the first '+"argument for mustache#render(template, view, partials)")}return defaultWriter.render(template,view,partials)};mustache.to_html=function to_html(template,view,partials,send){var result=mustache.render(template,view,partials);if(isFunction(send)){send(result)}else{return result}};mustache.escape=escapeHtml;mustache.Scanner=Scanner;mustache.Context=Context;mustache.Writer=Writer});
 
-    function isFunction( object )
-    {
-        return typeof object === "function"
-    }
-
-    function typeStr( obj )
-    {
-        return isArray( obj ) ? "array" : typeof obj
-    }
-
-    function escapeRegExp( string )
-    {
-        return string.replace( /[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&" )
-    }
-
-    function hasProperty( obj, propName )
-    {
-        return obj != null && typeof obj === "object" && propName in obj
-    }
-
-    var regExpTest = RegExp.prototype.test;
-
-    function testRegExp( re, string )
-    {
-        return regExpTest.call( re, string )
-    }
-
-    var nonSpaceRe = /\S/;
-
-    function isWhitespace( string )
-    {
-        return !testRegExp( nonSpaceRe, string )
-    }
-
-    var entityMap = {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "/": "&#x2F;"};
-
-    function escapeHtml( string )
-    {
-        return String( string ).replace( /[&<>"'\/]/g, function fromEntityMap( s )
-        {
-            return entityMap[s]
-        } )
-    }
-
-    var whiteRe  = /\s*/;
-    var spaceRe  = /\s+/;
-    var equalsRe = /\s*=/;
-    var curlyRe  = /\s*\}/;
-    var tagRe    = /#|\^|\/|>|\{|&|=|!/;
-
-    function parseTemplate( template, tags )
-    {
-        if ( !template )
-        {
-            return [];
-        }
-        var sections = [];
-        var tokens   = [];
-        var spaces   = [];
-        var hasTag   = false;
-        var nonSpace = false;
-
-        function stripSpace()
-        {
-            if ( hasTag && !nonSpace )
-            {
-                while ( spaces.length )
-                {
-                    delete tokens[spaces.pop()]
-                }
-            }
-            else
-            {
-                spaces = []
-            }
-            hasTag   = false;
-            nonSpace = false
-        }
-
-        var openingTagRe, closingTagRe, closingCurlyRe;
-
-        function compileTags( tagsToCompile )
-        {
-            if ( typeof tagsToCompile === "string" )
-            {
-                tagsToCompile = tagsToCompile.split( spaceRe, 2 );
-            }
-            if ( !isArray( tagsToCompile ) || tagsToCompile.length !== 2 )
-            {
-                throw new Error( "Invalid tags: " + tagsToCompile );
-            }
-            openingTagRe   = new RegExp( escapeRegExp( tagsToCompile[0] ) + "\\s*" );
-            closingTagRe   = new RegExp( "\\s*" + escapeRegExp( tagsToCompile[1] ) );
-            closingCurlyRe = new RegExp( "\\s*" + escapeRegExp( "}" + tagsToCompile[1] ) )
-        }
-
-        compileTags( tags || mustache.tags );
-        var scanner = new Scanner( template );
-        var start, type, value, chr, token, openSection;
-        while ( !scanner.eos() )
-        {
-            start = scanner.pos;
-            value = scanner.scanUntil( openingTagRe );
-            if ( value )
-            {
-                for ( var i = 0, valueLength = value.length; i < valueLength; ++i )
-                {
-                    chr = value.charAt( i );
-                    if ( isWhitespace( chr ) )
-                    {
-                        spaces.push( tokens.length )
-                    }
-                    else
-                    {
-                        nonSpace = true
-                    }
-                    tokens.push( ["text", chr, start, start + 1] );
-                    start += 1;
-                    if ( chr === "\n" )
-                    {
-                        stripSpace()
-                    }
-                }
-            }
-            if ( !scanner.scan( openingTagRe ) )
-            {
-                break;
-            }
-            hasTag = true;
-            type   = scanner.scan( tagRe ) || "name";
-            scanner.scan( whiteRe );
-            if ( type === "=" )
-            {
-                value = scanner.scanUntil( equalsRe );
-                scanner.scan( equalsRe );
-                scanner.scanUntil( closingTagRe )
-            }
-            else if ( type === "{" )
-            {
-                value = scanner.scanUntil( closingCurlyRe );
-                scanner.scan( curlyRe );
-                scanner.scanUntil( closingTagRe );
-                type = "&"
-            }
-            else
-            {
-                value = scanner.scanUntil( closingTagRe )
-            }
-            if ( !scanner.scan( closingTagRe ) )
-            {
-                throw new Error( "Unclosed tag at " + scanner.pos );
-            }
-            token = [type, value, start, scanner.pos];
-            tokens.push( token );
-            if ( type === "#" || type === "^" )
-            {
-                sections.push( token )
-            }
-            else if ( type === "/" )
-            {
-                openSection = sections.pop();
-                if ( !openSection )
-                {
-                    throw new Error( 'Unopened section "' + value + '" at ' + start );
-                }
-                if ( openSection[1] !== value )
-                {
-                    throw new Error( 'Unclosed section "' + openSection[1] + '" at ' + start )
-                }
-            }
-            else if ( type === "name" || type === "{" || type === "&" )
-            {
-                nonSpace = true
-            }
-            else if ( type === "=" )
-            {
-                compileTags( value )
-            }
-        }
-        openSection = sections.pop();
-        if ( openSection )
-        {
-            throw new Error( 'Unclosed section "' + openSection[1] + '" at ' + scanner.pos );
-        }
-        return nestTokens( squashTokens( tokens ) )
-    }
-
-    function squashTokens( tokens )
-    {
-        var squashedTokens = [];
-        var token, lastToken;
-        for ( var i = 0, numTokens = tokens.length; i < numTokens; ++i )
-        {
-            token = tokens[i];
-            if ( token )
-            {
-                if ( token[0] === "text" && lastToken && lastToken[0] === "text" )
-                {
-                    lastToken[1] += token[1];
-                    lastToken[3] = token[3]
-                }
-                else
-                {
-                    squashedTokens.push( token );
-                    lastToken = token
-                }
-            }
-        }
-        return squashedTokens
-    }
-
-    function nestTokens( tokens )
-    {
-        var nestedTokens = [];
-        var collector    = nestedTokens;
-        var sections     = [];
-        var token, section;
-        for ( var i = 0, numTokens = tokens.length; i < numTokens; ++i )
-        {
-            token = tokens[i];
-            switch ( token[0] )
-            {
-                case"#":
-                case"^":
-                    collector.push( token );
-                    sections.push( token );
-                    collector = token[4] = [];
-                    break;
-                case"/":
-                    section    = sections.pop();
-                    section[5] = token[2];
-                    collector  = sections.length > 0 ? sections[sections.length - 1][4] : nestedTokens;
-                    break;
-                default:
-                    collector.push( token )
-            }
-        }
-        return nestedTokens
-    }
-
-    function Scanner( string )
-    {
-        this.string = string;
-        this.tail   = string;
-        this.pos    = 0
-    }
-
-    Scanner.prototype.eos       = function eos()
-    {
-        return this.tail === ""
-    };
-    Scanner.prototype.scan      = function scan( re )
-    {
-        var match = this.tail.match( re );
-        if ( !match || match.index !== 0 )
-        {
-            return "";
-        }
-        var string = match[0];
-        this.tail  = this.tail.substring( string.length );
-        this.pos += string.length;
-        return string
-    };
-    Scanner.prototype.scanUntil = function scanUntil( re )
-    {
-        var index = this.tail.search( re ), match;
-        switch ( index )
-        {
-            case-1:
-                match     = this.tail;
-                this.tail = "";
-                break;
-            case 0:
-                match = "";
-                break;
-            default:
-                match     = this.tail.substring( 0, index );
-                this.tail = this.tail.substring( index )
-        }
-        this.pos += match.length;
-        return match
-    };
-    function Context( view, parentContext )
-    {
-        this.view   = view;
-        this.cache  = {".": this.view};
-        this.parent = parentContext
-    }
-
-    Context.prototype.push   = function push( view )
-    {
-        return new Context( view, this )
-    };
-    Context.prototype.lookup = function lookup( name )
-    {
-        var cache = this.cache;
-        var value;
-        if ( cache.hasOwnProperty( name ) )
-        {
-            value = cache[name]
-        }
-        else
-        {
-            var context = this, names, index, lookupHit = false;
-            while ( context )
-            {
-                if ( name.indexOf( "." ) > 0 )
-                {
-                    value = context.view;
-                    names = name.split( "." );
-                    index = 0;
-                    while ( value != null && index < names.length )
-                    {
-                        if ( index === names.length - 1 )
-                        {
-                            lookupHit = hasProperty( value, names[index] );
-                        }
-                        value = value[names[index++]]
-                    }
-                }
-                else
-                {
-                    value     = context.view[name];
-                    lookupHit = hasProperty( context.view, name )
-                }
-                if ( lookupHit )
-                {
-                    break;
-                }
-                context = context.parent
-            }
-            cache[name] = value
-        }
-        if ( isFunction( value ) )
-        {
-            value = value.call( this.view );
-        }
-        return value
-    };
-    function Writer()
-    {
-        this.cache = {}
-    }
-
-    Writer.prototype.clearCache     = function clearCache()
-    {
-        this.cache = {}
-    };
-    Writer.prototype.parse          = function parse( template, tags )
-    {
-        var cache  = this.cache;
-        var tokens = cache[template];
-        if ( tokens == null )
-        {
-            tokens = cache[template] = parseTemplate( template, tags );
-        }
-        return tokens
-    };
-    Writer.prototype.render         = function render( template, view, partials )
-    {
-        var tokens  = this.parse( template );
-        var context = view instanceof Context ? view : new Context( view );
-        return this.renderTokens( tokens, context, partials, template )
-    };
-    Writer.prototype.renderTokens   = function renderTokens( tokens, context, partials, originalTemplate )
-    {
-        var buffer = "";
-        var token, symbol, value;
-        for ( var i = 0, numTokens = tokens.length; i < numTokens; ++i )
-        {
-            value  = undefined;
-            token  = tokens[i];
-            symbol = token[0];
-            if ( symbol === "#" )
-            {
-                value = this.renderSection( token, context, partials, originalTemplate );
-            }
-            else if ( symbol === "^" )
-            {
-                value = this.renderInverted( token, context, partials, originalTemplate );
-            }
-            else if ( symbol === ">" )
-            {
-                value = this.renderPartial( token, context, partials, originalTemplate );
-            }
-            else if ( symbol === "&" )
-            {
-                value = this.unescapedValue( token, context );
-            }
-            else if ( symbol === "name" )
-            {
-                value = this.escapedValue( token, context );
-            }
-            else if ( symbol === "text" )
-            {
-                value = this.rawValue( token );
-            }
-            if ( value !== undefined )
-            {
-                buffer += value
-            }
-        }
-        return buffer
-    };
-    Writer.prototype.renderSection  = function renderSection( token, context, partials, originalTemplate )
-    {
-        var self   = this;
-        var buffer = "";
-        var value  = context.lookup( token[1] );
-
-        function subRender( template )
-        {
-            return self.render( template, context, partials )
-        }
-
-        if ( !value )
-        {
-            return;
-        }
-        if ( isArray( value ) )
-        {
-            for ( var j = 0, valueLength = value.length; j < valueLength; ++j )
-            {
-                buffer += this.renderTokens( token[4], context.push( value[j] ), partials, originalTemplate )
-            }
-        }
-        else if ( typeof value === "object" || typeof value === "string" || typeof value === "number" )
-        {
-            buffer += this.renderTokens( token[4], context.push( value ), partials, originalTemplate )
-        }
-        else if ( isFunction( value ) )
-        {
-            if ( typeof originalTemplate !== "string" )
-            {
-                throw new Error( "Cannot use higher-order sections without the original template" );
-            }
-            value = value.call( context.view, originalTemplate.slice( token[3], token[5] ), subRender );
-            if ( value != null )
-            {
-                buffer += value
-            }
-        }
-        else
-        {
-            buffer += this.renderTokens( token[4], context, partials, originalTemplate )
-        }
-        return buffer
-    };
-    Writer.prototype.renderInverted = function renderInverted( token, context, partials, originalTemplate )
-    {
-        var value = context.lookup( token[1] );
-        if ( !value || isArray( value ) && value.length === 0 )
-        {
-            return this.renderTokens( token[4], context, partials, originalTemplate )
-        }
-    };
-    Writer.prototype.renderPartial  = function renderPartial( token, context, partials )
-    {
-        if ( !partials )
-        {
-            return;
-        }
-        var value = isFunction( partials ) ? partials( token[1] ) : partials[token[1]];
-        if ( value != null )
-        {
-            return this.renderTokens( this.parse( value ), context, partials, value )
-        }
-    };
-    Writer.prototype.unescapedValue = function unescapedValue( token, context )
-    {
-        var value = context.lookup( token[1] );
-        if ( value != null )
-        {
-            return value
-        }
-    };
-    Writer.prototype.escapedValue   = function escapedValue( token, context )
-    {
-        var value = context.lookup( token[1] );
-        if ( value != null )
-        {
-            return mustache.escape( value )
-        }
-    };
-    Writer.prototype.rawValue       = function rawValue( token )
-    {
-        return token[1]
-    };
-    mustache.name                   = "mustache.js";
-    mustache.version                = "2.1.3";
-    mustache.tags                   = ["{{", "}}"];
-    var defaultWriter               = new Writer;
-    mustache.clearCache             = function clearCache()
-    {
-        return defaultWriter.clearCache()
-    };
-    mustache.parse                  = function parse( template, tags )
-    {
-        return defaultWriter.parse( template, tags )
-    };
-    mustache.render                 = function render( template, view, partials )
-    {
-        if ( typeof template !== "string" )
-        {
-            throw new TypeError( 'Invalid template! Template should be a "string" ' + 'but "' + typeStr( template ) + '" was given as the first ' + "argument for mustache#render(template, view, partials)" )
-        }
-        return defaultWriter.render( template, view, partials )
-    };
-    mustache.to_html                = function to_html( template, view, partials, send )
-    {
-        var result = mustache.render( template, view, partials );
-        if ( isFunction( send ) )
-        {
-            send( result )
-        }
-        else
-        {
-            return result
-        }
-    };
-    mustache.escape                 = escapeHtml;
-    mustache.Scanner                = Scanner;
-    mustache.Context                = Context;
-    mustache.Writer                 = Writer
-} );
-
-Object.equals     = function( a, b )
+Object.equals = function( a, b )
 {
     if ( a === b )
     {
@@ -600,17 +53,16 @@ Object.equals     = function( a, b )
 var TemplateCache = {};
 
 TemplateCache["addressSuggestions/addressDoctor.html"] = "<ul class=\"suggestion-list\">\n" +
-    "    {{#values}}\n" +
-    "    <li>\n" +
-    "        <a href=\"javascript:void(0)\" data-address-value=\"{{.}}\">\n" +
-    "            {{.}}\n" +
-    "        </a>\n" +
-    "    </li>\n" +
-    "    {{/values}}\n" +
-    "</ul>";
+   "    {{#values}}\n" +
+   "    <li>\n" +
+   "        <a href=\"javascript:void(0)\" data-address-value=\"{{.}}\">\n" +
+   "            {{.}}\n" +
+   "        </a>\n" +
+   "    </li>\n" +
+   "    {{/values}}\n" +
+   "</ul>";
 
 TemplateCache["addressSuggestions/postFinder.html"] = "{{#addresses}}\n" +
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.4.js
    "<div class=\"row\">\n" +
    "    <div class=\"small-12 columns\">\n" +
    "        <label class=\"address-select\">\n" +
@@ -637,42 +89,13 @@ TemplateCache["addressSuggestions/postFinder.html"] = "{{#addresses}}\n" +
    "</div>\n" +
    "{{/addresses}}\n" +
    "";
-=======
-    "<div class=\"row\">\n" +
-    "    <div class=\"col-xs-12\">\n" +
-    "        <label class=\"address-select\">\n" +
-    "            <input type=\"radio\" value=\"{{index}}\" name=\"postfinder\">\n" +
-    "		<span class=\"lh-075 address-box-inner\">\n" +
-    "\n" +
-    "			<span class=\"row\">\n" +
-    "				<span class=\"col-sm-6\">\n" +
-    "					<span class=\"block bold\">{{type}} {{number}}</span>\n" +
-    "					<span class=\"block\">{{street}} {{houseNo}}</span>\n" +
-    "					<span class=\"block\">{{zip}} {{city}}</span>\n" +
-    "				</span>\n" +
-    "\n" +
-    "				<span class=\"col-sm-6 muted\">\n" +
-    "					<span class=\"block bold\"><span>{{distance}} {{dimension}}</span></span>\n" +
-    "					<span class=\"block\">{{remark}}</span>\n" +
-    "				</span>\n" +
-    "\n" +
-    "			</span>\n" +
-    "\n" +
-    "		</span>\n" +
-    "        </label>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "{{/addresses}}\n" +
-    "";
->>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.7.js
 
 TemplateCache["error/errorMessage.html"] = "<div class=\"plentyErrorBoxContent\" data-plenty-error-code=\"{{code}}\">\n" +
-    "    <span class=\"PlentyErrorCode\">Code {{code}}:</span>\n" +
-    "    <span class=\"PlentyErrorMsg\">{{{message}}}</span>\n" +
-    "</div>\n" +
-    "";
+   "    <span class=\"PlentyErrorCode\">Code {{code}}:</span>\n" +
+   "    <span class=\"PlentyErrorMsg\">{{{message}}}</span>\n" +
+   "</div>\n" +
+   "";
 
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.4.js
 TemplateCache["error/errorPopup.html"] = "<div data-alert class=\"alert-box alert radius plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
    "  <div class=\"plentyErrorBoxInner\">\n" +
    "  </div>\n" +
@@ -694,48 +117,6 @@ TemplateCache["modal/modal.html"] = "<div class=\"reveal-modal medium {{cssClass
    "    <a class=\"close-reveal-modal\" aria-label=\"{{#translate}}Close{{/translate}}\">&#215;</a>\n" +
    "</div>\n" +
    "";
-=======
-TemplateCache["error/errorPopup.html"] = "<div class=\"plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
-    "    <button class=\"close\" type=\"button\"><span aria-hidden=\"true\">×</span>\n" +
-    "        <span class=\"sr-only\">{{#translate}}Close{{/translate}}</span>\n" +
-    "    </button>\n" +
-    "    <div class=\"plentyErrorBoxInner\">\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "";
-
-TemplateCache["modal/modal.html"] = "<div class=\"modal fade {{cssClass}}\">\n" +
-    "    <div class=\"modal-dialog\">\n" +
-    "        <div class=\"modal-content\">\n" +
-    "\n" +
-    "            {{#title}}\n" +
-    "            <div class=\"modal-header\">\n" +
-    "                <button class=\"close\" type=\"button\" data-dismiss=\"modal\" aria-label=\"{{#translate}}Close{{/translate}}\">\n" +
-    "                    <span aria-hidden=\"true\">&times;</span>\n" +
-    "                </button>\n" +
-    "                <h4 class=\"modal-title\">{{{title}}}</h4>\n" +
-    "            </div>\n" +
-    "            {{/title}}\n" +
-    "\n" +
-    "            <div class=\"modal-body\">{{{content}}}</div>\n" +
-    "\n" +
-    "            <div class=\"modal-footer\">\n" +
-    "\n" +
-    "                {{#labelDismiss}}\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">\n" +
-    "                    <span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>{{labelDismiss}}\n" +
-    "                </button>\n" +
-    "                {{/labelDismiss}}\n" +
-    "\n" +
-    "                <button type=\"button\" class=\"btn btn-primary\" data-plenty-modal=\"confirm\">\n" +
-    "                    <span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span>{{labelConfirm}}\n" +
-    "                </button>\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "";
->>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.7.js
 
 TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" class=\"overlay overlay-wait\"></div>";
 
@@ -785,39 +166,36 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         return instance;
     };
 
-    PlentyFramework.version = (function()
-    {
+    PlentyFramework.version = (function() {
 
         return {
-            get    : function()
-            {
+            get: function() {
                 return version;
             },
-            equals : function( v )
-            {
-                return compare( v ) == 0;
+            equals: function( v ) {
+                return compare(v) == 0;
             },
             compare: compare
         };
 
         function compare( compare )
         {
-            var localVersion   = version.split( "." );
-            var compareVersion = compare.split( "." );
+            var localVersion = version.split(".");
+            var compareVersion = compare.split(".");
 
-            for ( var i = 0; i < compareVersion.length; i++ )
+            for( var i = 0; i < compareVersion.length; i++ )
             {
-                if ( localVersion[i] === compareVersion[i] || compareVersion[i] === "*" )
+                if( localVersion[i] === compareVersion[i] || compareVersion[i] === "*" )
                 {
                     continue;
                 }
 
-                if ( parseInt( localVersion[i] ) < parseInt( compareVersion[i] ) )
+                if( parseInt(localVersion[i]) < parseInt(compareVersion[i]) )
                 {
                     return -1;
                 }
 
-                if ( parseInt( localVersion[i] ) > parseInt( compareVersion[i] ) )
+                if( parseInt(localVersion[i]) > parseInt(compareVersion[i]) )
                 {
                     return 1;
                 }
@@ -874,7 +252,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
      */
     PlentyFramework.getGlobal = function( identifier, fallbackValue )
     {
-        if ( !PlentyFramework.globals.hasOwnProperty( identifier ) )
+        if( !PlentyFramework.globals.hasOwnProperty( identifier ) )
         {
             return fallbackValue;
         }
@@ -1447,6 +825,9 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
 }( jQuery ));
 
+
+
+
 PlentyFramework.cssClasses = {
 
     active: "active"
@@ -1493,8 +874,7 @@ PlentyFramework.cssClasses = {
             $( popup ).show();
         },
 
-        hideAll: function()
-        {
+        hideAll: function() {
             $( '#CheckoutErrorPane' ).hide();
             $( '#CheckoutErrorPane' ).find( '.plentyErrorBoxInner' ).html( '' );
         }
@@ -1517,17 +897,12 @@ PlentyFramework.cssClasses = {
             element.on('closed.fndtn.reveal', '[data-reveal]', function ()
             {
                 modal.hide();
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.4.js
-                // element.remove();
-            });
-=======
-                if ( !modal.selector )
+                if( !modal.selector )
                 {
                     //Do not remove static modals
-                    element.remove();
+                    // element.remove();
                 }
             } );
->>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.7.js
 
             if( modal.timeout > 0 )
             {
@@ -2308,21 +1683,18 @@ PlentyFramework.cssClasses = {
         function Modal( selector )
         {
 
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.4.js
             var modal = this;
-						/**
+            modal.selector = selector;
+                        
+            /**
              * The UID of the modal
              * @attribute uid
              * @type {string}
              * @private
              * @default ""
              */
-            modal.title      = '';
-=======
-            var modal      = this;
-            modal.selector = selector;
+            modal.uid      = '';
 
->>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.7.js
             /**
              * The title of the modal
              * @attribute title
@@ -2540,15 +1912,8 @@ PlentyFramework.cssClasses = {
              */
             function show()
             {
-                if ( !!modal.selector )
+                if( !!modal.selector )
                 {
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.4.js
-                    bsModal = PlentyFramework.partials.Modal.getModal( modal.content );
-                } else {
-                    modal.uid = '_' + Math.random().toString(36).substr(2, 9);
-                    bsModal = $( PlentyFramework.compileTemplate('modal/modal.html', modal) );
-                }
-=======
                     bsModal = $( modal.selector );
                 }
                 else
@@ -2559,9 +1924,9 @@ PlentyFramework.cssClasses = {
                     }
                     else
                     {
+                        modal.uid = '_' + Math.random().toString(36).substr(2, 9);
                         bsModal = $( PlentyFramework.compileTemplate( 'modal/modal.html', modal ) );
                     }
->>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.7.js
 
                     $( modal.container ).append( bsModal );
 
@@ -4051,12 +3416,8 @@ PlentyFramework.cssClasses = {
             var shippingAddressID = $( '[name="shippingAddressID"]:checked' ).val();
 
             // TODO: move bootstrap specific function
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.4.js
             $('#shippingAdressSelect').foundation('reveal', 'close');
-=======
-            $( '#shippingAdressSelect' ).modal( 'hide' );
             //Modal.prepare( '#shippingAdressSelect' ).hide();
->>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.7.js
 
             if ( shippingAddressID < 0 )
             {
@@ -4317,7 +3678,6 @@ PlentyFramework.cssClasses = {
         function setMethodOfPayment( paymentID )
         {
             /*
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.6.js
             var methodsOfPaymentList = Checkout.getCheckout().MethodsOfPaymentList;
             var methodOfPayment;
             for( var i = 0; i < methodsOfPaymentList.length; i++ )
@@ -4335,19 +3695,6 @@ PlentyFramework.cssClasses = {
                 paymentID = $('input[name="MethodOfPaymentID"]:checked').val();
             }
 
-=======
-             var methodsOfPaymentList = Checkout.getCheckout().MethodsOfPaymentList;
-             var methodOfPayment;
-             for( var i = 0; i < methodsOfPaymentList.length; i++ )
-             {
-             if( methodsOfPaymentList[i].MethodOfPaymentID == paymentID )
-             {
-             methodOfPayment = methodsOfPaymentList[i];
-             break;
-             }
-             }
-             */
->>>>>>> 17bf306057598efb89064efd0a38c655158593d4:dist/plentymarketsCMStools-1.0.7.js
             Checkout.getCheckout().CheckoutMethodOfPaymentID = paymentID;
 
             if ( !pm.getGlobal( 'Checkout.AtrigaRequireUserConfirmation' ) )
@@ -4616,7 +3963,6 @@ PlentyFramework.cssClasses = {
 
     }, ['APIFactory', 'UIFactory', 'CMSFactory', 'CheckoutFactory', 'ModalFactory'] );
 }( jQuery, PlentyFramework ));
-
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
@@ -4908,10 +4254,10 @@ PlentyFramework.cssClasses = {
      */
     pm.service( 'NavigatorService', function( CMS, Checkout )
     {
-        var navigation     = [];		// contains navigation list elements
-        var container      = [];		// content containers
-        var current        = -1;		// index of currently shown content container
-        var buttonPrev     = {};		// navigation buttons
+        var navigation = [];		// contains navigation list elements
+        var container = [];		// content containers
+        var current = -1;		// index of currently shown content container
+        var buttonPrev = {};		// navigation buttons
         var buttonNext     = {};
         var interceptors   = {
             beforeChange: [],
@@ -5965,8 +5311,8 @@ PlentyFramework.cssClasses = {
             // check every required input inside form
             $form.find( '[data-plenty-validate], input.Required' ).each( function( i, elem )
             {
-                attrValidate   = $( elem ).attr( 'data-plenty-validate' );
-                formControls   = getFormControl( elem )
+                attrValidate = $( elem ).attr( 'data-plenty-validate' );
+                formControls = getFormControl( elem )
                 // validate text inputs
                 validationKeys = !!attrValidate ? attrValidate : 'text';
                 validationKeys = validationKeys.split( ',' );
@@ -6033,7 +5379,7 @@ PlentyFramework.cssClasses = {
                         }
                         else
                         {
-                            var minMax = (new Function( "return " + attrValidate ))() || {min: 1, max: 1};
+                            var minMax = (new Function("return " + attrValidate))() || {min: 1, max: 1};
                             checkedMin = minMax.min;
                             checkedMax = minMax.max;
                         }
@@ -6378,7 +5724,7 @@ PlentyFramework.cssClasses = {
     {
 
         return {
-            setMethodOfPayment : setMethodOfPayment,
+            setMethodOfPayment: setMethodOfPayment,
             confirmAtrigaPaymax: confirmAtrigaPaymax
         };
 
@@ -6584,7 +5930,7 @@ PlentyFramework.cssClasses = {
         {
             if ( MediaSizeService.interval() != 'xs' )
             {
-                if ( typeof href === 'string' && href.indexOf( '/' ) == -1 && $( href ).length > 0 )
+                if ( typeof href === 'string' && href.indexOf('/') == -1 && $( href ).length > 0 )
                 {
                     window.location.assign( $( href ).attr( 'href' ) );
                 }
