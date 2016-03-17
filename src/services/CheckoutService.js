@@ -379,17 +379,23 @@
         function setMethodOfPayment( paymentID )
         {
             /*
-             var methodsOfPaymentList = Checkout.getCheckout().MethodsOfPaymentList;
-             var methodOfPayment;
-             for( var i = 0; i < methodsOfPaymentList.length; i++ )
-             {
-             if( methodsOfPaymentList[i].MethodOfPaymentID == paymentID )
-             {
-             methodOfPayment = methodsOfPaymentList[i];
-             break;
-             }
-             }
-             */
+            var methodsOfPaymentList = Checkout.getCheckout().MethodsOfPaymentList;
+            var methodOfPayment;
+            for( var i = 0; i < methodsOfPaymentList.length; i++ )
+            {
+                if( methodsOfPaymentList[i].MethodOfPaymentID == paymentID )
+                {
+                    methodOfPayment = methodsOfPaymentList[i];
+                    break;
+                }
+            }
+            */
+            if( !paymentID )
+            {
+                // FIX for older callisto layouts (< 3.3): get payment id from input field
+                paymentID = $('input[name="MethodOfPaymentID"]:checked').val();
+            }
+
             Checkout.getCheckout().CheckoutMethodOfPaymentID = paymentID;
 
             if ( !pm.getGlobal( 'Checkout.AtrigaRequireUserConfirmation' ) )
