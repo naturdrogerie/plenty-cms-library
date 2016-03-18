@@ -1,0 +1,17 @@
+{
+  "OK": "OK",
+  "Close": "Schließen",
+  "Cancel": "Abbrechen",
+  "Confirm": "Bestätigen",
+  "Delete": "Löschen",
+  "Please confirm": "Bitte bestätigen",
+  "Save": "Speichern",
+  "Do you really want to remove \"{{item}}\" from your basket?": "Möchten Sie den Artikel \"{{item}}\" wirklich aus dem Warenkorb entfernen?",
+  "Select order parameters": "Bestellmerkmale wählen",
+  "Edit order parameters": "Bestellmerkmale ändern",
+  "Packstations and post offices in your area": "Packstationen und Postfilialen in der Nähe",
+  "Please enter a ZIP code and/or a city.": "Bitte geben Sie eine Postleitzahl und/oder einen Ort an.",
+  "more information": "Mehr Informationen",
+  "Your session has expired.": "Sie sind nicht mehr angemeldet.",
+  "Please log in again to continue shopping.": "Bitte melden Sie sich erneut an, um weiter einzukaufen."
+}

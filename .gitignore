@@ -2,9 +2,7 @@
 .idea/
 node_modules
 debug
+tmp
 doc
-callisto_2_3
-test/*.xml
 *.xml
 test/coverage/*
-callisto_dev

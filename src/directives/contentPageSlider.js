@@ -25,16 +25,14 @@
      * </div>
      */
     pm.directive('[data-plenty="contentpageSlider"]', function(i, elem) {
-        $(elem).owlCarousel({
-            navigation: true,
-            navigationText: false,
-            slideSpeed: 1000,
-            paginationSpeed: 1000,
-            singleItem: true,
-            autoPlay: 6000,
-            stopOnHover: true,
-            afterMove: function(current) { $(current).find('img[data-plenty-lazyload]').trigger('appear'); }
-        });
+        $(elem).slick({
+    			  lazyLoad: 'ondemand',
+    			  slidesToScroll: 1,
+    			  autoplay: true,
+    			  autoplaySpeed: 10000,
+    			  dots: true,
+    			  speed: 400
+  			});
     });
 
 }(jQuery, PlentyFramework));

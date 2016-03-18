@@ -17,6 +17,8 @@ but can be easily adapted to other templates by using the provided JavaScript AP
 - [Usage](#usage)
     - [Usage in store templates](#using-the-library-in-your-store-templates)
     - [Using the JavaScript API](#using-the-javascript-api)
+    - [Customizing and Theming](#customizing-and-theming)
+    - [Internationalization and Translation](#internationalization-and-translation)
 - [Copyright and License](#copyright-and-license)
 
 ## Installation
@@ -54,89 +56,169 @@ This library is used by the plentymarkets [**Callisto Light**](http://standardte
 
 #### Binding directives
 
-Just add the *data*-attribute used for the directive you want to bind to any HTML element:
+Directives can be used to add several functions to your markup. The library provides a simple syntax to access directives from a single *data*-attribute:
+
+`EVENT:DIRECTIVE.METHOD( PARAMS* )`
+
+- EVENT: any event to trigger the method on, e.g. 'click', 'focus', 'change'. To trigger a directive when document is ready, use 'ready' or leave empty.
+- DIRECTIVE: The name of the directive, e.g. 'UI', 'Basket', 'Tab'
+- METHOD: A public method of the referenced directive.
+- PARAMS: You can pass several parameters to a directive. It is possible to pass Strings, numbers, boolean values or this-reference containing the bound HTML-element.
+
+It is also possible to chain multiple bindings separated by `;`
+
 ```html
-<!-- Clicking this element will make the page scroll to top -->
-<span data-plenty="toTop">Go to top</span>
-```
-
-
-#### Calling service functions
-
-You can call public methods of any service (e.g. *BasketService*) by calling `plenty.SERVICE_NAME.SERVICE_FUNCTION()`:
-```js
-plenty.BasketService.addItem( BasketItem );
-// 'plenty' is shorthand for PlentyFramework.getInstance();
+<span data-plenty="click:UI.toggleClass('newClass', this)">Toggle class</span>
+<span data-plenty="UI.initToTop(this)">To top</span>
+<input data-plenty="change:Basket.setItemQuantity( 123, this ); focus:UI.removeClass( 'has-error', this )" type="text" />
 ```
 
 ### Using the JavaScript API
 
-#### Creating a custom directive
+#### Components hierarchy and dependency injection
 
-Create your own directive using `PlentyFramework.directive( selector, callbackFn );`:
+The library is composed of several layers to separate logical methods from UI-dependent functions:
+
+`HTML / Markup` &lt;---&gt; `directives` &lt;---&gt; `services` &lt;---&gt; `factories`
+
+Every component can inject other components at the same or higher levels inside this hierarchy. On the other hand it is not possible
+to inject lower-level componets. According to this, a directive can inject other directives, services and factories but a factory can only inject other factories but no services or directives.
+
+#### Creating custom components
+All components are built the same way using `PlentyFramework.directive()`, `PlentyFramework.service()` or `PlentyFramework.factory()`.
+Each of these methods expects the following parameters:
+- a component name: This name can be used to inject this components into other.
+- the components definition: a function wrapping all methods of this component.
+- a list of dependencies: An array containing names of other components to inject. Injected components will be passed as parameters to the components wrapper function.
+
 ```js
-PlentyFramework.directive('.myClass', function(i, element) {
-	element.click(function() {
-		console.log('.myClass no ' + i + ' was clicked.');
-	});
-});
+PlentyFramework.directive( 'MyDirective', function( aService, aFactory ) {
+    return {
+        doAnything: function() {
+            console.log('Hello!)';
+        }
+    }
+}, ['SomeServiceName', 'FactoryToInject'] );
 ```
 
-Inject services in your directive:
+#### Registering global variables
+
+Global variables can be used to pass server-side variables to the client-side framework:
+```html
+<script>
+	PlentyFramework.setGlobal( 'URL_HOME', {% Link_Home() %} );
+</script>
+````
+Use `PlentyFramework.getGlobal( variable_name )` to get the value of a registered global variable.
 ```js
-PlentyFramework.directive('.myClass', function(i, element, ServiceA, ServiceB) {
-
-	ServiceA.doSomethingWithElement( element );
-
-	element.click(function() {
-		ServiceB.doAnything();
-	});
-
-}, ['ServiceA', 'ServiceB']);
-```
-#### Creating a custom services
-
-You can create a custom service to provide global functions by using `PlentyFramework.service( serviceName, callbackFn );`:
-```js
-PlentyFramework.service('MyService', function() {
-	return {
-		publicFn: publicFn
-	}
-
-	function publicFn() {
-		var message = privateFn();
-	}
-
-	function privateFn() {
-		return "I have been created inside a private function of 'MyService'";
-	}
-});
+	// in your service, factory or directive
+	console.log( PlentyFramework.getGlobal( 'URL_HOME' ) );
 ```
 
-You can inject factories in your service:
+### Customizing and Theming
+
+This library was built in addition to the [**Callisto Light**](http://standardtemplate.plenty-showcase.de/) store template
+and uses [Twitter Bootstrap](http://getbootstrap.com/) for UI functions and styling.
+
+The behaviour and layout of all affected elements are defined in `src/partials`. For rendering .html-templates this library
+uses the [Mustache Syntax](https://github.com/janl/mustache.js/).
+
+#### Customizing the behaviour of partials
+
+Each partial provides a simple JavaScript interface describing its basic behaviour.
+
+**Example:** `src/partials/waitscreen/waitscreen.js`
 ```js
-PlentyFramework.service('MyService', function(FactoryA, FactoryB) {
+PlentyFramework.partials.WaitScreen = {
 
-	return {
-		callFactory: FactoryA.doSomething
-	}
+        show: function( element ) {
+        	// define, how your waitScreen should appear
+            element.addClass('in');
+        },
 
-}, ['FactoryA', 'FactoryB']);
+        hide: function( element ) {
+            element.removeClass('in');
+        }
+
+    };
 ```
-#### Creating a custom factory
+You can edit these functions to make your loading screen act as you like.
 
-Create a factory to provide functions for services. Factories cannot be accessed from instances of PlentyFramework.
-Factories can inject other factories.
+#### Changing the layout of partials
+
+All generated html structures (e.g. Modals or Error-Messages) are sourced in separate .html-files and can be edited
+without affecting the functionality. You can use the [Mustache Syntax](https://github.com/janl/mustache.js/) to bind
+variables to the templates and the {{#translate}} function to make strings multilingual.
+
+### Internationalization and Translation
+
+Language dependent strings are sourced in .json-files and can be loaded separately. To support several languages you can
+add more language files containing your translations of the defined strings.
+
+#### Loading a language file
+
+Language files should be loaded immediately after loading the the JavaScript library.
+
+**Example:**
+```html
+<script src="plentymarketsCMStools-X.X.X.min.js"></script>
+<script>
+	{% if $Lang == "de" %}
+	PlentyFramework.loadLanguageFile('/lang/de_DE.json');
+	{% else $Lang == "en" %}
+	PlentyFramework.loadLanguageFile('/lang/en_EN.json');
+	{% endif %}
+</script>
+```
+**Hint:** The path referencing your language file has to be relative to the plentymarketsCMStools.js script path.
+```
+.
++-- path
+|   +-- to
+|       +-- plentymarketsCMStools.js
+|       +-- lang
+|           +-- de_DE.json
+|           +-- en_EN.json
++-- another
+    +-- path
+        +-- es_ES.json
+```
+in this case you can use: `PlentyFramework.loadLanguageFile('/lang/de_DE.json')` or `PlentyFramework.loadLanguageFile('/../../another/path/es_ES.json')`
+
+#### Using multilingual Strings in JavaScript
+
+You can use `PlentyFramework.translate()` to receive the translation of a String from the currently loaded language file.
+If the language file not contains a translation it returns the original String.
+`PlentyFramework.translate()` also renders the provided String with the [Mustache Syntax](https://github.com/janl/mustache.js/)
+so you can bind variables to your string.
+
+**Examples:**
+
+`translations.json`
+
+```json
+{
+	"Close": "Exit",
+	"Hello {{name}}": "Hi {{name}}!"
+}
+```
+
+`script.js`
 ```js
-PlentyFramework.factory('MyFactory', function( AnotherFactory ) {
-	return {
-		prepareInformation: publicFactoryFunction
-	}
+PlentyFramework.translate("Close"); // returns "Exit"
+PlentyFramework.translate("Hello {{name}}", {name: 'World'}); // returns "Hi World!"
+PlentyFramework.translate("Something"); // returns "Something" (as fallback value)
+```
 
-	function publicFactoryFunction() {
-		return AnotherFactory.getInformation();
-	}
-}, ['AnotherFactory']);
+#### Using multilingual Strings in HTML-Templates
+
+In addition to the basic Mustache Syntax the plentymarketsCMStools provide its `translate()` method to all templates:
+```html
+<button>{{#translate}}Close{{/translate}}</button>
+```
+This will be rendered to:
+```html
+<button>Exit</button>
 ```
 
 ## Copyright and license

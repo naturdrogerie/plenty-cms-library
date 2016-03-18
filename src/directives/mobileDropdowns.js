@@ -87,11 +87,9 @@
     }, ['MediaSizeService']);
 
     $(document).ready(function() {
-
         if ( pm.getInstance().MediaSizeService.interval() != 'xs' && pm.getInstance().MediaSizeService.interval() != 'sm' && Modernizr.touch ) {
             $('.dropdown.open > a[data-plenty-enable="touch"]').parent().removeClass('open');
         }
-
     });
 
 }(jQuery, PlentyFramework));

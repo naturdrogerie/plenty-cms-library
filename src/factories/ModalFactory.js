@@ -10,19 +10,21 @@
 /**
  * @module Factories
  */
-(function($, pm) {
+(function( $, pm )
+{
 
     /**
      * Provides methods for creating and displaying modal popups.
      * @class ModalFactory
      * @static
      */
-	pm.factory('ModalFactory', function() {
+    pm.factory( 'ModalFactory', function()
+    {
 
-		return {
+        return {
             prepare: prepare,
             isModal: isModal
-		};
+        };
 
         /**
          * Detect if given html contains a valid modal
@@ -30,8 +32,9 @@
          * @param {string} html
          * @returns {boolean}
          */
-        function isModal( html ) {
-            return $(html).filter('.modal' ).length + $(html).find('.modal' ).length > 0;
+        function isModal( html )
+        {
+            return PlentyFramework.partials.Modal.isModal( html );
         }
 
         /**
@@ -39,8 +42,9 @@
          * @function prepare
          * @returns {Modal}
          */
-        function prepare() {
-            return new Modal();
+        function prepare( selector )
+        {
+            return new Modal( selector );
         }
 
         /**
@@ -50,9 +54,21 @@
          * @returns {Modal}
          * @constructor
          */
-        function Modal() {
+        function Modal( selector )
+        {
 
             var modal = this;
+            modal.selector = selector;
+                        
+            /**
+             * The UID of the modal
+             * @attribute uid
+             * @type {string}
+             * @private
+             * @default ""
+             */
+            modal.uid      = '';
+
             /**
              * The title of the modal
              * @attribute title
@@ -60,7 +76,9 @@
              * @private
              * @default ""
              */
-            modal.title      = '';
+            modal.title = '';
+
+            modal.cssClass = '';
 
             /**
              * The content of the modal
@@ -69,7 +87,7 @@
              * @private
              * @default ""
              */
-            modal.content    = '';
+            modal.content = '';
 
             /**
              * The content of the dismiss-button
@@ -78,7 +96,7 @@
              * @private
              * @default "Abbrechen"
              */
-            modal.labelDismiss = 'Abbrechen';
+            modal.labelDismiss = pm.translate( "Cancel" );
 
             /**
              * the label of the confirmation button
@@ -87,7 +105,7 @@
              * @private
              * @default "Bestätigen"
              */
-            modal.labelConfirm = 'Bestätigen';
+            modal.labelConfirm = pm.translate( "Confirm" );
 
             /**
              * Callback when modal is confirmed by clicking confirmation button.
@@ -97,7 +115,9 @@
              * @private
              * @default function() {}
              */
-            modal.onConfirm  = function() {};
+            modal.onConfirm = function()
+            {
+            };
 
             /**
              * Callback when modal is dismissed by closing the modal
@@ -106,7 +126,9 @@
              * @private
              * @default function() {}
              */
-            modal.onDismiss  = function() {};
+            modal.onDismiss = function()
+            {
+            };
 
             /**
              * jQuery selector of the container element to display the modal in.
@@ -115,7 +137,7 @@
              * @private
              * @default "body"
              */
-            modal.container  = 'body';
+            modal.container = 'body';
 
             /**
              * Timeout to close the modal automatically. Set &lt;0 to disable.
@@ -126,22 +148,29 @@
              */
             modal.timeout = -1;
 
+            modal.hide            = hide;
+            modal.startTimeout    = startTimeout;
+            modal.stopTimeout     = stopTimeout;
+            modal.pauseTimeout    = pauseTimeout;
+            modal.continueTimeout = continueTimeout;
+
             var bsModal;
             var timeout, interval;
             var timeRemaining, timeStart;
             var paused = false;
 
             return {
-                setTitle: setTitle,
-                setContent: setContent,
-                setContainer: setContainer,
+                setTitle       : setTitle,
+                setClass       : setClass,
+                setContent     : setContent,
+                setContainer   : setContainer,
                 setLabelConfirm: setLabelConfirm,
                 setLabelDismiss: setLabelDismiss,
-                onConfirm: onConfirm,
-                onDismiss: onDismiss,
-                setTimeout: setTimeout,
-                show: show,
-                hide: hide
+                onConfirm      : onConfirm,
+                onDismiss      : onDismiss,
+                setTimeout     : setTimeout,
+                show           : show,
+                hide           : hide
             };
 
             /**
@@ -150,8 +179,15 @@
              * @param   {string}    title The title
              * @returns {Modal}     Modal object for chaining methods
              */
-            function setTitle( title ) {
+            function setTitle( title )
+            {
                 modal.title = title;
+                return this;
+            }
+
+            function setClass( cssClass )
+            {
+                modal.cssClass = cssClass;
                 return this;
             }
 
@@ -161,40 +197,47 @@
              * @param   {string}    content The content
              * @returns {Modal}     Modal object for chaining methods
              */
-            function setContent( content ) {
+            function setContent( content )
+            {
                 modal.content = content;
                 return this;
             }
 
             /**
-             * Set the {{#crossLink "ModalFactory.Modal/labelConfirm:attribute}}label of the confirmation button{{/crossLink}} of the modal
+             * Set the {{#crossLink "ModalFactory.Modal/labelConfirm:attribute}}label of the confirmation
+             * button{{/crossLink}} of the modal
              * @function setLabelConfirm
              * @param   {string}    label The label
              * @returns {Modal}     Modal object for chaining methods
              */
-            function setLabelConfirm( label ) {
+            function setLabelConfirm( label )
+            {
                 modal.labelConfirm = label;
                 return this;
             }
 
             /**
-             * Set the {{#crossLink "ModalFactory.Modal/labelDismiss:attribute}}label if the dismiss button{{/crossLink}} of the modal
+             * Set the {{#crossLink "ModalFactory.Modal/labelDismiss:attribute}}label if the dismiss
+             * button{{/crossLink}} of the modal
              * @function setLabelDismiss
              * @param   {string}    label The label
              * @returns {Modal}     Modal object for chaining methods
              */
-            function setLabelDismiss( label ) {
+            function setLabelDismiss( label )
+            {
                 modal.labelDismiss = label;
                 return this;
             }
 
             /**
-             * Set the {{#crossLink "ModalFactory.Modal/onConfirm:attribute}}confirmation callback{{/crossLink}} of the modal
+             * Set the {{#crossLink "ModalFactory.Modal/onConfirm:attribute}}confirmation callback{{/crossLink}} of the
+             * modal
              * @function onConfirm
              * @param   {function}  callback The callback if modal is confirmed
              * @returns {Modal}     Modal object for chaining methods
              */
-            function onConfirm( callback ) {
+            function onConfirm( callback )
+            {
                 modal.onConfirm = callback;
                 return this;
             }
@@ -205,12 +248,11 @@
              * @param   {function}  callback The callback if modal is dismissed
              * @returns {Modal}     Modal object for chaining methods
              */
-            function onDismiss( callback ) {
+            function onDismiss( callback )
+            {
                 modal.onDismiss = callback;
                 return this;
             }
-
-
 
             /**
              * Set the {{#crossLink "ModalFactory.Modal/container:attribute}}container{{/crossLink}} of the modal
@@ -218,7 +260,8 @@
              * @param   {string}    container The jQuery selector of the container to display the modal in
              * @returns {Modal}     Modal object for chaining methods
              */
-            function setContainer( container ) {
+            function setContainer( container )
+            {
                 modal.container = container;
                 return this;
             }
@@ -229,7 +272,8 @@
              * @param   {number}    timeout The timeout to close the modal automatically. Set &lt;0 to disable
              * @returns {Modal}     Modal object for chaining methods
              */
-            function setTimeout( timeout ) {
+            function setTimeout( timeout )
+            {
                 modal.timeout = timeout;
                 return this;
             }
@@ -240,94 +284,64 @@
              * Start timer to hide the modal automatically if timeout is set.
              * @function show
              */
-            function show() {
-                if( isModal( modal.content ) ) {
-                    bsModal = $(modal.content);
-                    if( bsModal.length > 1 || !bsModal.is('.modal') ) {
-                        bsModal = $(modal.content).filter('.modal') || $(modal.content).find('.modal');
-                    }
-                } else {
-                    bsModal = $( buildTemplate() );
+            function show()
+            {
+                if( !!modal.selector )
+                {
+                    bsModal = $( modal.selector );
                 }
+                else
+                {
+                    if ( isModal( modal.content ) )
+                    {
+                        bsModal = PlentyFramework.partials.Modal.getModal( modal.content );
+                    }
+                    else
+                    {
+                        modal.uid = '_' + Math.random().toString(36).substr(2, 9);
+                        bsModal = $( PlentyFramework.compileTemplate( 'modal/modal.html', modal ) );
+                    }
 
-                $(modal.container).append( bsModal );
+                    $( modal.container ).append( bsModal );
 
-                // append additional scripts executable
-                var scripts = $(modal.content).filter('script');
-                if( scripts.length > 0 ) {
-                    scripts.each(function( i, script ) {
-                        var element = document.createElement('script');
-                        element.type = 'text/javascript';
-                        element.innerHTML = $(script).text();
-                        $( modal.container ).append( element );
-                    });
+                    // append additional scripts executable
+                    var scripts = $( modal.content ).filter( 'script' );
+                    if ( scripts.length > 0 )
+                    {
+                        scripts.each( function( i, script )
+                        {
+                            var element       = document.createElement( 'script' );
+                            element.type      = 'text/javascript';
+                            element.innerHTML = $( script ).text();
+                            $( modal.container ).append( element );
+                        } );
+                    }
                 }
 
                 // bind callback functions
-                bsModal.on('hidden.bs.modal', function() {
-                    hide();
-                });
-                bsModal.find('[data-plenty-modal="confirm"]').click( function() {
+                PlentyFramework.partials.Modal.init( bsModal, modal );
+                bsModal.find( '[data-plenty-modal="confirm"]' ).click( function()
+                {
                     var close = modal.onConfirm();
-                    if( close ) hide(true);
-                });
 
-                bsModal.modal('show');
+                    if ( typeof close == "undefined" )
+                    {
+                        close = true;
+                    }
 
-                bsModal.on('hidden.bs.modal', function() {
-                    bsModal.remove();
-                });
+                    if ( close )
+                    {
+                        hide( true );
+                    }
+                } );
 
-                if( modal.timeout > 0 ) {
+                PlentyFramework.partials.Modal.show( bsModal );
+
+                if ( modal.timeout > 0 )
+                {
                     startTimeout();
-                    bsModal.on('hide.bs.modal', stopTimeout);
-                    bsModal.find('.modal-content').hover(pauseTimeout, function() {
-                        if( bsModal.is('.in') )
-                        {
-                            continueTimeout();
-                        }
-                    });
                 }
 
-            }
-
-            /**
-             * Wrap html content in bootstrap styled modal.
-             * @function buildTemplate
-             * @private
-             * @returns {string}
-             */
-            function buildTemplate() {
-
-                var template = '<div class="modal fade"> \
-                                    <div class="modal-dialog"> \
-                                        <div class="modal-content">';
-
-                if( !!modal.title && modal.title.length > 0 ) {
-                    template +=             '<div class="modal-header"> \
-                                                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> \
-                                                <h4 class="modal-title">' + modal.title + '</h4> \
-                                            </div>';
-                }
-
-                template +=                 '<div class="modal-body">' + modal.content + '</div> \
-                                             <div class="modal-footer">';
-
-                if( !!modal.labelDismiss && modal.labelDismiss.length > 0 ) {
-                    template +=                '<button type="button" class="btn btn-default" data-dismiss="modal"> \
-                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>' + modal.labelDismiss + '  \
-                                                </button>';
-                }
-
-                template +=                    '<button type="button" class="btn btn-primary" data-dismiss="modal" data-plenty-modal="confirm"> \
-                                                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> ' + modal.labelConfirm + ' \
-                                                </button> \
-                                            </div> \
-                                        </div> \
-                                    </div> \
-                                </div>';
-
-                return template;
             }
 
             /**
@@ -335,10 +349,12 @@
              * @function hide
              * @param {boolean} confirmed Flag indicating of modal is closed by confirmation button or dismissed
              */
-            function hide( confirmed ) {
-                bsModal.modal('hide');
+            function hide( confirmed )
+            {
+                PlentyFramework.partials.Modal.hide( bsModal );
 
-                if( !confirmed ) {
+                if ( !confirmed )
+                {
                     modal.onDismiss();
                 }
             }
@@ -348,23 +364,27 @@
              * @function startTimeout
              * @private
              */
-            function startTimeout() {
+            function startTimeout()
+            {
                 timeRemaining = modal.timeout;
-                timeStart = (new Date()).getTime();
+                timeStart     = (new Date()).getTime();
 
-                timeout = window.setTimeout(function () {
-                    window.clearInterval(interval);
+                timeout = window.setTimeout( function()
+                {
+                    window.clearInterval( interval );
                     hide();
-                }, modal.timeout);
+                }, modal.timeout );
 
-                bsModal.find('[data-plenty-modal="timer"]').text(timeRemaining / 1000);
-                interval = window.setInterval(function () {
-                    if (!paused) {
+                bsModal.find( '[data-plenty-modal="timer"]' ).text( timeRemaining / 1000 );
+                interval = window.setInterval( function()
+                {
+                    if ( !paused )
+                    {
                         var secondsRemaining = timeRemaining - (new Date()).getTime() + timeStart;
-                        secondsRemaining = Math.round(secondsRemaining / 1000);
-                        bsModal.find('[data-plenty-modal="timer"]').text(secondsRemaining);
+                        secondsRemaining     = Math.round( secondsRemaining / 1000 );
+                        bsModal.find( '[data-plenty-modal="timer"]' ).text( secondsRemaining );
                     }
-                }, 1000)
+                }, 1000 )
             }
 
             /**
@@ -372,10 +392,11 @@
              * @function pauseTimeout
              * @private
              */
-            function pauseTimeout() {
+            function pauseTimeout()
+            {
                 paused = true;
                 timeRemaining -= (new Date()).getTime() - timeStart;
-                window.clearTimeout(timeout);
+                window.clearTimeout( timeout );
             }
 
             /**
@@ -383,13 +404,15 @@
              * @function continueTimeout
              * @private
              */
-            function continueTimeout() {
-                paused = false;
+            function continueTimeout()
+            {
+                paused    = false;
                 timeStart = (new Date()).getTime();
-                timeout = window.setTimeout(function () {
+                timeout   = window.setTimeout( function()
+                {
                     hide();
-                    window.clearInterval(interval);
-                }, timeRemaining);
+                    window.clearInterval( interval );
+                }, timeRemaining );
             }
 
             /**
@@ -397,15 +420,12 @@
              * @function stopTimeout
              * @private
              */
-            function stopTimeout() {
+            function stopTimeout()
+            {
                 window.clearTimeout( timeout );
                 window.clearInterval( interval );
             }
 
         }
-
-
-
-
-	});
-}(jQuery, PlentyFramework));
+    } );
+}( jQuery, PlentyFramework ));
