@@ -4,9 +4,9 @@
     $( document ).on( 'initPartials', function( e, root )
     {
 
-        $( root ).find( '[data-toggle="tooltip"]' ).tooltip( {
-            container: 'body'
-        } );
+        //$( root ).find( '[data-toggle="tooltip"]' ).tooltip( {
+        //    container: 'body'
+        //} );
 
     } );
 

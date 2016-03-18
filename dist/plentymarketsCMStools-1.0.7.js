@@ -975,13 +975,14 @@ PlentyFramework.cssClasses = {
     $( document ).on( 'initPartials', function( e, root )
     {
 
-        $( root ).find( '[data-toggle="tooltip"]' ).tooltip( {
-            container: 'body'
-        } );
+        //$( root ).find( '[data-toggle="tooltip"]' ).tooltip( {
+        //    container: 'body'
+        //} );
 
     } );
 
 })( jQuery );
+
 (function( $, pm )
 {
 
@@ -6638,193 +6639,6 @@ PlentyFramework.cssClasses = {
 
     }, ['ValidationService'] );
 }( jQuery, PlentyFramework ));
-/**
- * Licensed under AGPL v3
- * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
- * =====================================================================================
- * @copyright   Copyright (c) 2015, plentymarkets GmbH (http://www.plentymarkets.com)
- * @author      Felix Dausch <felix.dausch@plentymarkets.com>
- * =====================================================================================
- */
-
-(function($, pm) {
-
-
-    /*
-     * content page slider
-     *
-     * usage (functionality requires only attribute data-plenty="contentpageSlider"):
-     * <div class="contentpageSlider" data-plenty="contentpageSlider">
-     *     <div class="slide">
-     *         ...
-     *     </div>
-     *     <div class="slide">
-     *         ...
-     *     </div>
-     *     ...
-     * </div>
-     */
-    pm.directive('[data-plenty="contentpageSlider"]', function(i, elem) {
-        $(elem).slick({
-    			  lazyLoad: 'ondemand',
-    			  slidesToScroll: 1,
-    			  autoplay: true,
-    			  autoplaySpeed: 10000,
-    			  dots: true,
-    			  speed: 400
-  			});
-    });
-
-}(jQuery, PlentyFramework));
-
-/**
- * Licensed under AGPL v3
- * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
- * =====================================================================================
- * @copyright   Copyright (c) 2015, plentymarkets GmbH (http://www.plentymarkets.com)
- * @author      Felix Dausch <felix.dausch@plentymarkets.com>
- * =====================================================================================
- */
-
-(function($, pm) {
-
-    /*
-     * Mobile dropdowns
-     * Toggles dropdowns using css class 'open' instead of pseudo class :hover
-     * Usage:
-         <li class="dropdown">
-         <a data-plenty-enable="CONDITION">...</a>
-         </li>
-     *
-     * possible values for CONDITION
-     * "touch"						: use 'open'-class if device is touch-device AND media size is 'md' or 'lg'
-     * "toggle-xs-sm-or-touch" : use 'open'-class if device is "touch" (as above) OR media size is 'xs' or 'sm'
-     */
-    // TODO: handle external dependency to Modernizr
-    pm.directive('.dropdown > a[data-plenty-enable]', function(i, elem, MediaSizeService) {
-
-       if( $(elem).attr('data-plenty-enable') == "toggle-xs-sm-or-touch" ) {
-            $(elem).click(function(e) {
-                if ( MediaSizeService.interval() == 'xs' || MediaSizeService.interval() == 'sm' || ( MediaSizeService.interval() != 'xs' && MediaSizeService.interval() != 'sm' && Modernizr.touch ) ) {
-                    $('.dropdown.open > a[data-plenty-enable="toggle-xs-sm-or-touch"]').not( $(this) ).parent().removeClass('open');
-                    $(this).parent().toggleClass('open');
-                    return false;
-                }
-            });
-        }
-
-        // dropdown enabled touch
-        else if( $(elem).attr('data-plenty-enable') == "touch" ) {
-            $(elem).click(function() {
-                if ( MediaSizeService.interval() != 'xs' && MediaSizeService.interval() != 'sm' && Modernizr.touch ) { // otherwise already has mobile navigation
-                    $('.dropdown.open > a[data-plenty-enable="touch"]').not( $(this) ).parent().removeClass('open');
-                    if ( ! $(this).parent().hasClass('open') ) {
-                        $(this).parent().addClass('open');
-                        return false;
-                    }
-                }
-            });
-        }
-    }, ['MediaSizeService']);
-
-
-    pm.directive('*', function(i, elem, MediaSizeService) {
-
-        $(elem).click(function (e) {
-            if (MediaSizeService.interval() == 'xs' || MediaSizeService.interval() == 'sm' || ( MediaSizeService.interval() != 'xs' && MediaSizeService.interval() != 'sm' && Modernizr.touch )) {
-                var dropdown = $('.dropdown.open > a[data-plenty-enable="toggle-xs-sm-or-touch"]').parent();
-                if (dropdown.length > 0 && !dropdown.is(e.target) && dropdown.has(e.target).length <= 0) {
-                    dropdown.removeClass('open');
-                }
-            }
-
-            if (MediaSizeService.interval() != 'xs' && MediaSizeService.interval() != 'sm' && Modernizr.touch) {
-                var dropdown = $('.dropdown.open > a[data-plenty-enable="touch"]').parent();
-                if (dropdown.length > 0 && !dropdown.is(e.target) && dropdown.has(e.target).length <= 0) {
-                    dropdown.removeClass('open');
-                }
-            }
-        });
-    }, ['MediaSizeService']);
-
-
-    pm.directive(window, function(i, elem, MediaSizeService) {
-        $(window).on('orientationchange', function() {
-            if ( MediaSizeService.interval() == 'xs' || MediaSizeService.interval() == 'sm' || ( MediaSizeService.interval() != 'xs' && MediaSizeService.interval() != 'sm' && Modernizr.touch ) ) {
-                $('.dropdown.open > a[data-plenty-enable="toggle-xs-sm-or-touch"]').parent().removeClass('open');
-            }
-
-            if ( MediaSizeService.interval() != 'xs' && MediaSizeService.interval() != 'sm' && Modernizr.touch ) {
-                $('.dropdown.open > a[data-plenty-enable="touch"]').parent().removeClass('open');
-            }
-        });
-        $(window).on('sizeChange', function(newValue) {
-            if ( newValue != 'xs' && newValue != 'sm' && ! Modernizr.touch ) {
-                $('.dropdown.open > a[data-plenty-enable="toggle-xs-sm-or-touch"]').parent().removeClass('open');
-            }
-        });
-    }, ['MediaSizeService']);
-
-    $(document).ready(function() {
-        if ( pm.getInstance().MediaSizeService.interval() != 'xs' && pm.getInstance().MediaSizeService.interval() != 'sm' && Modernizr.touch ) {
-            $('.dropdown.open > a[data-plenty-enable="touch"]').parent().removeClass('open');
-        }
-    });
-
-}(jQuery, PlentyFramework));
-
-/**
- * Licensed under AGPL v3
- * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
- * =====================================================================================
- * @copyright   Copyright (c) 2015, plentymarkets GmbH (http://www.plentymarkets.com)
- * @author      Felix Dausch <felix.dausch@plentymarkets.com>
- * =====================================================================================
- */
-
-(function($, pm) {
-
-    /*
-     * Toggle Class
-     * toggle style-classes on click
-     * Usage / data-attribute:
-     * <div data-plenty-toggle="{target: 'body', class: 'toggledClass', media: 'xs sm'}"></div>
-     * target	:	jQuery selector to toggle the class at.
-     * class		:  class(es) to toggle at target element
-     * media		:  only toggle class on given media sizes (optional)
-     *
-     * (!) using data-plenty-toggle on <a>-elements will prevent redirecting to href=""
-     */
-    pm.directive('[data-plenty-toggle]', function(i, elem, MediaSizeService) {
-        if( $(elem).attr('data-plenty-toggle').search(';') < 0 ) {
-            eval('var data = ' + $(elem).attr('data-plenty-toggle'));
-            if ( data.target && data.class ) {
-                $(elem).click(function() {
-                    var isMedia = false;
-                    if ( data.media ) {
-                        if ( data.media.indexOf(' ') != -1 ) {
-                            var mediaArr = data.media.split(' ');
-                            for ( i = 0; i < mediaArr.length; i++ ) {
-                                if ( MediaSizeService.interval() == mediaArr[i] ) {
-                                    isMedia = true;
-                                }
-                            }
-                        }
-                        else {
-                            if ( MediaSizeService.interval() == data.media ) isMedia = true;
-                        }
-                    }
-                    if ( ! data.media || isMedia == true  ) {
-                        $(data.target).toggleClass(data.class);
-                        if ( $(elem).is('a') ) return false;
-                    }
-                });
-            }
-        }
-    }, ['MediaSizeService']);
-
-}(jQuery, PlentyFramework));
-
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
