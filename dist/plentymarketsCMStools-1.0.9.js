@@ -85,7 +85,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 (function( $ )
 {
     // will be overridden by grunt
-    var version = "1.0.8";
+    var version = "1.0.9";
 
     /**
      * Collection of uncompiled registered factories & services.
@@ -973,14 +973,11 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         {
             $( window ).on( 'orientationchange sizeChange', function()
             {
-                resetDropdowns( dropdownElements );
-                resetDropdowns( closableDropdownElements );
-            } );
-
-            // handle "close menu on click outside"
-            $( 'html' ).on( "click touchstart", function( event )
-            {
-                resetDropdowns( closableDropdownElements, event );
+                if ( !$( "input" ).is( ":focus" ) )
+                {
+                    resetDropdowns( dropdownElements );
+                    resetDropdowns( closableDropdownElements );
+                }
             } );
         }
 
@@ -992,14 +989,20 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 $current = $( dropdownList[i] );
                 if ( !!event )
                 {
-                    if ( $current.find( $( event.target ) ).length === 0 )
+                    if ( $current.find( $( event.target ) ).length === 0
+                        && !$( "input" ).is( ":focus" ) )
                     {
                         $current.removeClass( 'open' );
+                        $( 'html' ).unbind( "click touchstart", resetEvent );
                     }
                 }
                 else
                 {
-                    $current.removeClass( 'open' );
+                    if ( !$( "input" ).is( ":focus" ) )
+                    {
+                        $current.removeClass( 'open' );
+                        $( 'html' ).unbind( "click touchstart", resetEvent );
+                    }
                 }
             }
 
@@ -1051,6 +1054,9 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                     // do nothing
                 }
             }
+
+            // handle "close menu on click outside"
+            $( 'html' ).on( "click touchstart", resetEvent );
         }
 
         function showDropdownHideOthers( elem, parent )
@@ -1058,7 +1064,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             var $parent = $( parent );
 
             // hide other dropdowns
-            resetDropdowns( closableDropdownElements );
+            resetDropdowns( closableDropdownElements, elem );
 
             // remember opened dropdown
             if ( $.inArray( $parent[0], closableDropdownElements ) < 0 )
@@ -1097,9 +1103,11 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 $elemParent.addClass( 'animating' );
                 $elem.siblings( 'ul' ).slideToggle( 400, function()
                 {
-                    if ( $elemParent.is( '.open' ) )
+                    if ( $elemParent.is( '.open' ) && !$( "input" ).is( ":focus" ) )
                     {
                         $elemParent.removeClass( 'open' );
+                        $elem.siblings( 'ul' ).removeAttr( 'style' );
+                        $elemParent.removeClass( 'animating' );
                     }
                     else
                     {
@@ -1109,10 +1117,16 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                             dropdownElements.push( $elemParent[0] );
                         }
                     }
-                    $elem.siblings( 'ul' ).removeAttr( 'style' );
-                    $elemParent.removeClass( 'animating' );
                 } );
             }
+
+            // handle "close menu on click outside"
+            $( 'html' ).on( "click touchstart", resetEvent );
+        }
+
+        function resetEvent( event )
+        {
+            resetDropdowns( closableDropdownElements, event );
         }
 
     }, ['MediaSizeService'] );
@@ -1368,7 +1382,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
  */
 (function( $, pm )
 {
-    pm.directive( 'UI', function( MediaSizeService, SocialShareService )
+    pm.directive( 'UI', function( MediaSizeService, SocialShareService, UIFactory )
     {
         // elements to calculate height.
         var equalHeightElementList = [];
@@ -1376,6 +1390,8 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
         return {
             initUIWindowEvents  : initUIWindowEvents,
+            showWaitscreen      : showWaitscreen,
+            hideWaitscreen      : hideWaitscreen,
             addContentPageSlider: addContentPageSlider,
             equalHeight         : equalHeight,
             initToTop           : initToTop,
@@ -1413,6 +1429,24 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                     }
                 }
             } );
+        }
+
+        /**
+         * Display waitscreen on page e.g. for requests.
+         * Use with care and don't forget to hide waitscreen, if your calls are done or broke!!
+         */
+        function showWaitscreen()
+        {
+            UIFactory.showWaitscreen();
+        }
+
+        /**
+         * Just hide the waitscreen.
+         * @param forceClose
+         */
+        function hideWaitscreen( forceClose )
+        {
+            UIFactory.hideWaitscreen( forceClose );
         }
 
         /**
@@ -1821,7 +1855,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             }
         }
 
-    }, ['MediaSizeService', 'SocialShareService'] );
+    }, ['MediaSizeService', 'SocialShareService', 'UIFactory'] );
 }( jQuery, PlentyFramework ));
 (function( $, pm )
 {
@@ -3917,9 +3951,21 @@ PlentyFramework.cssClasses = {
                     Checkout.loadCheckout()
                         .done( function()
                         {
+                            var artAttr     = $( "[name^=ArticleAttribute]" );
+                            var requestData = {ArticleID: article[0].BasketItemItemID};
+
+                            if ( artAttr )
+                            {
+                                $( "[name^=ArticleAttribute]" ).each( function( i, v )
+                                {
+                                    requestData[$( v ).attr( "name" )] = $( v ).val();
+                                } );
+                            }
+
                             refreshBasketPreview();
+
                             // Show confirmation popup
-                            CMS.getContainer( 'ItemViewItemToBasketConfirmationOverlay', {ArticleID: article[0].BasketItemItemID} ).from( 'ItemView' )
+                            CMS.getContainer( 'ItemViewItemToBasketConfirmationOverlay', requestData ).from( 'ItemView' )
                                 .done( function( response )
                                 {
                                     var timeout = pm.getGlobal( 'TimeoutItemToBasketOverlay', 5000 );
@@ -4162,9 +4208,10 @@ PlentyFramework.cssClasses = {
                                         {
                                             $( this ).siblings( ":not('[data-plenty-checkout-template]')" ).remove();
                                             $( this ).remove();
-                                            $basketListContainer.prepend( $( response.data[0] ) ).hide().fadeIn(function() {
+                                            $basketListContainer.prepend( $( response.data[0] ) ).hide().fadeIn( function()
+                                            {
                                                 pm.getInstance().bindDirectives( $basketListContainer );
-                                            });
+                                            } );
                                         } );
                                     } );
                                 }
@@ -4479,9 +4526,8 @@ PlentyFramework.cssClasses = {
             var values            = form.getFormValues();
             var shippingAddressID = $( '[name="shippingAddressID"]:checked' ).val();
 
-            // TODO: move bootstrap specific function
-            $('#shippingAdressSelect').foundation('reveal', 'close');
-            //Modal.prepare( '#shippingAdressSelect' ).hide();
+            // TODO: check if still needed
+            // $('#shippingAdressSelect').foundation('reveal', 'close');
 
             if ( shippingAddressID < 0 )
             {
@@ -4508,18 +4554,8 @@ PlentyFramework.cssClasses = {
 
                             Checkout.getCheckout().CheckoutCustomerShippingAddressID = response.data.ID;
                             Checkout.getCheckout().CheckoutShippingCountryID         = response.data.CountryID;
-                            delete Checkout.getCheckout().CheckoutMethodOfPaymentID;
-                            delete Checkout.getCheckout().CheckoutShippingProfileID;
 
-                            Checkout.setCheckout().done( function()
-                            {
-                                Checkout.reloadContainer( "MethodsOfPaymentList" );
-                                Checkout.reloadContainer( "ShippingProfilesList" );
-                                if ( Checkout.getCheckout().CustomerInvoiceAddress.LoginType == 2 )
-                                {
-                                    Checkout.reloadContainer( 'CustomerShippingAddress' );
-                                }
-                            } );
+                            updatePaymentAndShippingDependencies();
                         } );
                 }
                 else
@@ -4535,24 +4571,38 @@ PlentyFramework.cssClasses = {
                 {
                     // change shipping address id
                     Checkout.getCheckout().CheckoutCustomerShippingAddressID = shippingAddressID;
-                    delete Checkout.getCheckout().CheckoutMethodOfPaymentID;
-                    delete Checkout.getCheckout().CheckoutShippingProfileID;
 
-                    return Checkout.setCheckout().done( function()
-                    {
-                        Checkout.reloadContainer( "MethodsOfPaymentList" );
-                        Checkout.reloadContainer( "ShippingProfilesList" );
-                        if ( Checkout.getCheckout().CustomerInvoiceAddress.LoginType == 2 )
-                        {
-                            Checkout.reloadContainer( 'CustomerShippingAddress' );
-                        }
-                    } );
+                    updatePaymentAndShippingDependencies();
                 }
                 else
                 {
                     return API.idle();
                 }
             }
+        }
+
+        function updatePaymentAndShippingDependencies()
+        {
+            delete Checkout.getCheckout().CheckoutMethodOfPaymentID;
+            delete Checkout.getCheckout().CheckoutShippingProfileID;
+
+            return Checkout.setCheckout().done( function()
+            {
+                Checkout.reloadContainer( "MethodsOfPaymentList" );
+                Checkout.reloadContainer( "ShippingProfilesList" );
+
+                if ( Checkout.getCheckout().CustomerInvoiceAddress.LoginType == 2 )
+                {
+                    Checkout.reloadContainer( 'CustomerShippingAddress' );
+                }
+                $( '#shippingAdressSelect' ).modal( 'hide' );
+
+                // don't hit me. Ugly hack: this is to force quit/remove everything from modal.
+                if ( $( ".modal-backdrop" ) )
+                {
+                    $( ".modal-backdrop" ).remove();
+                }
+            } );
         }
 
         /**
@@ -4569,6 +4619,7 @@ PlentyFramework.cssClasses = {
             var invoiceAddress       = form.getFormValues();
             invoiceAddress.LoginType = 1;
 
+            // add custom properties if necessary.
             if ( invoiceAddress.checkout
                 && invoiceAddress.checkout.customerInvoiceAddress
                 && invoiceAddress.checkout.customerInvoiceAddress.CustomerProperty )
@@ -4697,9 +4748,10 @@ PlentyFramework.cssClasses = {
                             if ( response.error.error_stack[i].code == 651 )
                             {
                                 // notify atriga validation errors
-                                Checkout.reloadContainer( 'MethodsOfPaymentList' ).done(function() {
-                                    $(document).trigger('plenty.AtrigaValidationFailed');
-                                });
+                                Checkout.reloadContainer( 'MethodsOfPaymentList' ).done( function()
+                                {
+                                    $( document ).trigger( 'plenty.AtrigaValidationFailed' );
+                                } );
                             }
                             else
                             {
@@ -4708,9 +4760,9 @@ PlentyFramework.cssClasses = {
                         }
 
                         // display remaining errors
-                        if( errorStack.length > 0 )
+                        if ( errorStack.length > 0 )
                         {
-                            UI.printErrors(errorStack);
+                            UI.printErrors( errorStack );
                         }
                     }
                     catch ( e )
@@ -4744,10 +4796,10 @@ PlentyFramework.cssClasses = {
              }
              */
 
-            if( !paymentID )
+            if ( !paymentID )
             {
                 // FIX for older callisto layouts (< 3.3): get payment id from input field
-                paymentID = $('input[name="MethodOfPaymentID"]:checked').val();
+                paymentID = $( 'input[name="MethodOfPaymentID"]:checked' ).val();
             }
 
             Checkout.getCheckout().CheckoutMethodOfPaymentID = paymentID;
@@ -6364,10 +6416,10 @@ PlentyFramework.cssClasses = {
             var hasError      = false;
 
             // check every required input inside form
-            $form.find( '[data-plenty-validate], input.Required' ).each( function( i, elem )
+            $form.find( '[data-plenty-validate], :required' ).each( function( i, elem )
             {
-                attrValidate = $( elem ).attr( 'data-plenty-validate' );
-                formControls = getFormControl( elem )
+                attrValidate   = $( elem ).attr( 'data-plenty-validate' );
+                formControls   = getFormControl( elem );  
                 // validate text inputs
                 validationKeys = !!attrValidate ? attrValidate : 'text';
                 validationKeys = validationKeys.split( ',' );
@@ -6668,4 +6720,3 @@ jQuery( document ).ready( function()
 {
     plenty.bindDirectives();
 } );
-//# sourceMappingURL=plentymarketsCMStools-1.0.8.js.map

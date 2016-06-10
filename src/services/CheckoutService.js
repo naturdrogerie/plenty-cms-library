@@ -116,9 +116,8 @@
             var values            = form.getFormValues();
             var shippingAddressID = $( '[name="shippingAddressID"]:checked' ).val();
 
-            // TODO: move bootstrap specific function
-            $('#shippingAdressSelect').foundation('reveal', 'close');
-            //Modal.prepare( '#shippingAdressSelect' ).hide();
+            // TODO: check if still needed
+            // $('#shippingAdressSelect').foundation('reveal', 'close');
 
             if ( shippingAddressID < 0 )
             {
@@ -145,18 +144,8 @@
 
                             Checkout.getCheckout().CheckoutCustomerShippingAddressID = response.data.ID;
                             Checkout.getCheckout().CheckoutShippingCountryID         = response.data.CountryID;
-                            delete Checkout.getCheckout().CheckoutMethodOfPaymentID;
-                            delete Checkout.getCheckout().CheckoutShippingProfileID;
 
-                            Checkout.setCheckout().done( function()
-                            {
-                                Checkout.reloadContainer( "MethodsOfPaymentList" );
-                                Checkout.reloadContainer( "ShippingProfilesList" );
-                                if ( Checkout.getCheckout().CustomerInvoiceAddress.LoginType == 2 )
-                                {
-                                    Checkout.reloadContainer( 'CustomerShippingAddress' );
-                                }
-                            } );
+                            updatePaymentAndShippingDependencies();
                         } );
                 }
                 else
@@ -172,24 +161,38 @@
                 {
                     // change shipping address id
                     Checkout.getCheckout().CheckoutCustomerShippingAddressID = shippingAddressID;
-                    delete Checkout.getCheckout().CheckoutMethodOfPaymentID;
-                    delete Checkout.getCheckout().CheckoutShippingProfileID;
 
-                    return Checkout.setCheckout().done( function()
-                    {
-                        Checkout.reloadContainer( "MethodsOfPaymentList" );
-                        Checkout.reloadContainer( "ShippingProfilesList" );
-                        if ( Checkout.getCheckout().CustomerInvoiceAddress.LoginType == 2 )
-                        {
-                            Checkout.reloadContainer( 'CustomerShippingAddress' );
-                        }
-                    } );
+                    updatePaymentAndShippingDependencies();
                 }
                 else
                 {
                     return API.idle();
                 }
             }
+        }
+
+        function updatePaymentAndShippingDependencies()
+        {
+            delete Checkout.getCheckout().CheckoutMethodOfPaymentID;
+            delete Checkout.getCheckout().CheckoutShippingProfileID;
+
+            return Checkout.setCheckout().done( function()
+            {
+                Checkout.reloadContainer( "MethodsOfPaymentList" );
+                Checkout.reloadContainer( "ShippingProfilesList" );
+
+                if ( Checkout.getCheckout().CustomerInvoiceAddress.LoginType == 2 )
+                {
+                    Checkout.reloadContainer( 'CustomerShippingAddress' );
+                }
+                $( '#shippingAdressSelect' ).modal( 'hide' );
+
+                // don't hit me. Ugly hack: this is to force quit/remove everything from modal.
+                if ( $( ".modal-backdrop" ) )
+                {
+                    $( ".modal-backdrop" ).remove();
+                }
+            } );
         }
 
         /**
@@ -206,6 +209,7 @@
             var invoiceAddress       = form.getFormValues();
             invoiceAddress.LoginType = 1;
 
+            // add custom properties if necessary.
             if ( invoiceAddress.checkout
                 && invoiceAddress.checkout.customerInvoiceAddress
                 && invoiceAddress.checkout.customerInvoiceAddress.CustomerProperty )
@@ -334,9 +338,10 @@
                             if ( response.error.error_stack[i].code == 651 )
                             {
                                 // notify atriga validation errors
-                                Checkout.reloadContainer( 'MethodsOfPaymentList' ).done(function() {
-                                    $(document).trigger('plenty.AtrigaValidationFailed');
-                                });
+                                Checkout.reloadContainer( 'MethodsOfPaymentList' ).done( function()
+                                {
+                                    $( document ).trigger( 'plenty.AtrigaValidationFailed' );
+                                } );
                             }
                             else
                             {
@@ -345,9 +350,9 @@
                         }
 
                         // display remaining errors
-                        if( errorStack.length > 0 )
+                        if ( errorStack.length > 0 )
                         {
-                            UI.printErrors(errorStack);
+                            UI.printErrors( errorStack );
                         }
                     }
                     catch ( e )
@@ -381,10 +386,10 @@
              }
              */
 
-            if( !paymentID )
+            if ( !paymentID )
             {
                 // FIX for older callisto layouts (< 3.3): get payment id from input field
-                paymentID = $('input[name="MethodOfPaymentID"]:checked').val();
+                paymentID = $( 'input[name="MethodOfPaymentID"]:checked' ).val();
             }
 
             Checkout.getCheckout().CheckoutMethodOfPaymentID = paymentID;
