@@ -624,7 +624,7 @@
         // opportunity to insert a script path manually through defining
         // data-plenty-script-path on a DOM element (i.e. a script tag)
         if ($('[data-plenty-script-path]').length > 0) {
-          PlentyFramework.scriptPath = $('[data-plenty-script-path]').first().data('data-plenty-script-path');
+          PlentyFramework.scriptPath = $('[data-plenty-script-path]').first().data('plenty-script-path');
         }
         else {
           var scripts = document.getElementsByTagName( 'SCRIPT' );
@@ -714,6 +714,3 @@
     }
 
 }( jQuery ));
-
-
-
