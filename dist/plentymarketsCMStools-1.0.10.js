@@ -85,7 +85,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 (function( $ )
 {
     // will be overridden by grunt
-    var version = "1.0.9";
+    var version = "1.0.10";
 
     /**
      * Collection of uncompiled registered factories & services.
@@ -835,6 +835,11 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             basketItemsList.BasketItemPriceID  = parentForm.find( '[name="SYS_P_ID"]' ).val();
             basketItemsList.BasketItemQuantity = parentForm.find( '[name="ArticleQuantity"]' ).val();
             basketItemsList.BasketItemBranchID = parentForm.find( '[name="source_category"]' ).val();
+
+            if ( parentForm.find( '[name="P_ID"]' ) )
+            {
+                basketItemsList.BasketItemPriceID = parentForm.find( '[name="P_ID"]:checked' ).val();
+            }
 
             //attributes
             var attributeInputsList = parentForm.find( '[name^="ArticleAttribute"]' );
