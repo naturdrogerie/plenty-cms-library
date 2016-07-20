@@ -290,6 +290,12 @@
             eventStack.push( event );
             return callback.apply( null, params );
         } );
+
+        if( document.readyState === "complete" && eventType === "ready" )
+        {
+            // execute 'ready' directives directly if document is already loaded
+            callback.apply( null, params );
+        }
     }
 
     function addCustomEvents( element )
@@ -540,10 +546,12 @@
      */
     PlentyFramework.loadLanguageFile = function( fileName )
     {
-        $.get( PlentyFramework.scriptPath + fileName ).done( function( response )
-        {
+        $.ajax({
+            url:  PlentyFramework.scriptPath + fileName,
+            dataType: 'json'
+        }).done( function( response ) {
             PlentyFramework.Strings = response;
-        } );
+        });
     };
 
     /**
@@ -616,13 +624,17 @@
         // opportunity to insert a script path manually through defining
         // data-plenty-script-path on a DOM element (i.e. a script tag)
         if ($('[data-plenty-script-path]').length > 0) {
-          PlentyFramework.scriptPath = $('[data-plenty-script-path]').first().data('data-plenty-script-path');
+          PlentyFramework.scriptPath = $('[data-plenty-script-path]').first().data('plenty-script-path');
         }
         else {
           var scripts = document.getElementsByTagName( 'SCRIPT' );
-          if( scripts.length > 0 ) {
-              PlentyFramework.scriptPath = scripts[ scripts.length - 1 ].src.match( /(.*)\/(.*)\.js(\?\S*)?$/ )[ 1 ];
-          }
+        	for( var i = scripts.length - 1; i >= 0; i-- ) {
+            	var path = scripts[i].src.match( /(.*)\/(.*)\.js(\?\S*)?$/ );
+            	if( !!path ) {
+                	PlentyFramework.scriptPath = path[1];
+                	break;
+            	}
+            }
         }
 
     };
@@ -702,6 +714,3 @@
     }
 
 }( jQuery ));
-
-
-

@@ -157,9 +157,27 @@
                     Checkout.loadCheckout()
                         .done( function()
                         {
+                            var $artAttr           = $( "[name^=ArticleAttribute]" );
+                            var $unitCombinationId = article[0].BasketItemPriceID;
+                            var requestData        = {ArticleID: article[0].BasketItemItemID};
+
+                            if ( $artAttr.val() > 0 )
+                            {
+                                $artAttr.each( function( i, value )
+                                {
+                                    value                             = $( value );
+                                    requestData[value.attr( "name" )] = value.val();
+                                } );
+                            }
+                            else if ( $unitCombinationId && $unitCombinationId > 0 )
+                            {
+                                requestData["UnitCombinationId"] = $unitCombinationId;
+                            }
+
                             refreshBasketPreview();
+
                             // Show confirmation popup
-                            CMS.getContainer( 'ItemViewItemToBasketConfirmationOverlay', {ArticleID: article[0].BasketItemItemID} ).from( 'ItemView' )
+                            CMS.getContainer( 'ItemViewItemToBasketConfirmationOverlay', requestData ).from( 'ItemView' )
                                 .done( function( response )
                                 {
                                     var timeout = pm.getGlobal( 'TimeoutItemToBasketOverlay', 5000 );
@@ -402,7 +420,10 @@
                                         {
                                             $( this ).siblings( ":not('[data-plenty-checkout-template]')" ).remove();
                                             $( this ).remove();
-                                            $basketListContainer.prepend( $( response.data[0] ) ).hide().fadeIn();
+                                            $basketListContainer.prepend( $( response.data[0] ) ).hide().fadeIn( function()
+                                            {
+                                                pm.getInstance().bindDirectives( $basketListContainer );
+                                            } );
                                         } );
                                     } );
                                 }
