@@ -6497,7 +6497,7 @@ PlentyFramework.cssClasses = {
                         }
                         else
                         {
-                            var minMax = (new Function("return " + attrValidate))() || {min: 1, max: 1};
+                            var minMax = (new Function( "return " + attrValidate ))() || {min: 1, max: 1};
                             checkedMin = minMax.min;
                             checkedMax = minMax.max;
                         }
