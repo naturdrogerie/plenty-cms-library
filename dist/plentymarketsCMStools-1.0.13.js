@@ -39,7 +39,6 @@ TemplateCache["addressSuggestions/postFinder.html"] = "{{#addresses}}\n" +
    "";
 
 TemplateCache["error/errorMessage.html"] = "<div class=\"plentyErrorBoxContent\" data-plenty-error-code=\"{{code}}\">\n" +
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.12.js
    "    <span class=\"PlentyErrorCode\">Code {{code}}:</span>\n" +
    "    <span class=\"PlentyErrorMsg\">{{{message}}}</span>\n" +
    "</div>\n" +
@@ -59,62 +58,15 @@ TemplateCache["modal/modal.html"] = "<div class=\"reveal-modal medium {{cssClass
    "\n" +
    "    {{{content}}}\n" +
    "\n" +
+   "    {{#labelConfirm}}\n" +
    "    <button type=\"button\" class=\"button right\" data-dismiss=\"modal\" data-plenty-modal=\"confirm\">{{labelConfirm}}</button>\n" +
+   "    {{/labelConfirm}}\n" +
    "    {{#labelDismiss}}\n" +
    "    <button type=\"button\" class=\"button info\" data-dismiss=\"modal\">{{labelDismiss}}</button>\n" +
    "    {{/labelDismiss}}\n" +
    "    <a class=\"close-reveal-modal\" aria-label=\"{{#translate}}Close{{/translate}}\">&#215;</a>\n" +
    "</div>\n" +
    "";
-=======
-    "    <span class=\"PlentyErrorCode\">Code {{code}}:</span>\n" +
-    "    <span class=\"PlentyErrorMsg\">{{{message}}}</span>\n" +
-    "</div>\n" +
-    "";
-
-TemplateCache["error/errorPopup.html"] = "<div class=\"plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
-    "    <button class=\"close\" type=\"button\"><span aria-hidden=\"true\">×</span>\n" +
-    "        <span class=\"sr-only\">{{#translate}}Close{{/translate}}</span>\n" +
-    "    </button>\n" +
-    "    <div class=\"plentyErrorBoxInner\">\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "";
-
-TemplateCache["modal/modal.html"] = "<div class=\"modal fade {{cssClass}}\">\n" +
-    "    <div class=\"modal-dialog\">\n" +
-    "        <div class=\"modal-content\">\n" +
-    "\n" +
-    "            {{#title}}\n" +
-    "            <div class=\"modal-header\">\n" +
-    "                <button class=\"close\" type=\"button\" data-dismiss=\"modal\" aria-label=\"{{#translate}}Close{{/translate}}\">\n" +
-    "                    <span aria-hidden=\"true\">&times;</span>\n" +
-    "                </button>\n" +
-    "                <h4 class=\"modal-title\">{{{title}}}</h4>\n" +
-    "            </div>\n" +
-    "            {{/title}}\n" +
-    "\n" +
-    "            <div class=\"modal-body\">{{{content}}}</div>\n" +
-    "\n" +
-    "            <div class=\"modal-footer\">\n" +
-    "\n" +
-    "                {{#labelDismiss}}\n" +
-    "                <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">\n" +
-    "                    <span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>{{labelDismiss}}\n" +
-    "                </button>\n" +
-    "                {{/labelDismiss}}\n" +
-    "\n" +
-    "                {{#labelConfirm}}\n" +
-    "                <button type=\"button\" class=\"btn btn-primary\" data-plenty-modal=\"confirm\">\n" +
-    "                    <span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span>{{labelConfirm}}\n" +
-    "                </button>\n" +
-    "                {{/labelConfirm}}\n" +
-    "            </div>\n" +
-    "        </div>\n" +
-    "    </div>\n" +
-    "</div>\n" +
-    "";
->>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.13.js
 
 TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" class=\"overlay overlay-wait\"></div>";
 
@@ -4927,9 +4879,9 @@ PlentyFramework.cssClasses = {
                                 }
                             } );
                         } ).onConfirm( function()
-                        {
-                            return saveBankDetails();
-                        } )
+                    {
+                        return saveBankDetails();
+                    } )
                         .show();
                 } );
 
@@ -5001,9 +4953,9 @@ PlentyFramework.cssClasses = {
                                 }
                             } );
                         } ).onConfirm( function()
-                        {
-                            return saveCreditCard();
-                        } )
+                    {
+                        return saveCreditCard();
+                    } )
                         .show();
                 } );
         }
