@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="reveal-modal medium {{cssClass}}" data-reveal aria-labelledby="modalTitle{{uid}}" aria-hidden="true" role="dialog">
     {{#title}}
     <h2 id="modalTitle{{uid}}">{{{title}}}</h2>
@@ -10,4 +11,37 @@
     <button type="button" class="button info" data-dismiss="modal">{{labelDismiss}}</button>
     {{/labelDismiss}}
     <a class="close-reveal-modal" aria-label="{{#translate}}Close{{/translate}}">&#215;</a>
+=======
+<div class="modal fade {{cssClass}}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            {{#title}}
+            <div class="modal-header">
+                <button class="close" type="button" data-dismiss="modal" aria-label="{{#translate}}Close{{/translate}}">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">{{{title}}}</h4>
+            </div>
+            {{/title}}
+
+            <div class="modal-body">{{{content}}}</div>
+
+            <div class="modal-footer">
+
+                {{#labelDismiss}}
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>{{labelDismiss}}
+                </button>
+                {{/labelDismiss}}
+
+                {{#labelConfirm}}
+                <button type="button" class="btn btn-primary" data-plenty-modal="confirm">
+                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>{{labelConfirm}}
+                </button>
+                {{/labelConfirm}}
+            </div>
+        </div>
+    </div>
+>>>>>>> plentymarkets/master
 </div>

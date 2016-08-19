@@ -39,6 +39,7 @@ TemplateCache["addressSuggestions/postFinder.html"] = "{{#addresses}}\n" +
    "";
 
 TemplateCache["error/errorMessage.html"] = "<div class=\"plentyErrorBoxContent\" data-plenty-error-code=\"{{code}}\">\n" +
+<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.12.js
    "    <span class=\"PlentyErrorCode\">Code {{code}}:</span>\n" +
    "    <span class=\"PlentyErrorMsg\">{{{message}}}</span>\n" +
    "</div>\n" +
@@ -65,6 +66,55 @@ TemplateCache["modal/modal.html"] = "<div class=\"reveal-modal medium {{cssClass
    "    <a class=\"close-reveal-modal\" aria-label=\"{{#translate}}Close{{/translate}}\">&#215;</a>\n" +
    "</div>\n" +
    "";
+=======
+    "    <span class=\"PlentyErrorCode\">Code {{code}}:</span>\n" +
+    "    <span class=\"PlentyErrorMsg\">{{{message}}}</span>\n" +
+    "</div>\n" +
+    "";
+
+TemplateCache["error/errorPopup.html"] = "<div class=\"plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
+    "    <button class=\"close\" type=\"button\"><span aria-hidden=\"true\">×</span>\n" +
+    "        <span class=\"sr-only\">{{#translate}}Close{{/translate}}</span>\n" +
+    "    </button>\n" +
+    "    <div class=\"plentyErrorBoxInner\">\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "";
+
+TemplateCache["modal/modal.html"] = "<div class=\"modal fade {{cssClass}}\">\n" +
+    "    <div class=\"modal-dialog\">\n" +
+    "        <div class=\"modal-content\">\n" +
+    "\n" +
+    "            {{#title}}\n" +
+    "            <div class=\"modal-header\">\n" +
+    "                <button class=\"close\" type=\"button\" data-dismiss=\"modal\" aria-label=\"{{#translate}}Close{{/translate}}\">\n" +
+    "                    <span aria-hidden=\"true\">&times;</span>\n" +
+    "                </button>\n" +
+    "                <h4 class=\"modal-title\">{{{title}}}</h4>\n" +
+    "            </div>\n" +
+    "            {{/title}}\n" +
+    "\n" +
+    "            <div class=\"modal-body\">{{{content}}}</div>\n" +
+    "\n" +
+    "            <div class=\"modal-footer\">\n" +
+    "\n" +
+    "                {{#labelDismiss}}\n" +
+    "                <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">\n" +
+    "                    <span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>{{labelDismiss}}\n" +
+    "                </button>\n" +
+    "                {{/labelDismiss}}\n" +
+    "\n" +
+    "                {{#labelConfirm}}\n" +
+    "                <button type=\"button\" class=\"btn btn-primary\" data-plenty-modal=\"confirm\">\n" +
+    "                    <span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span>{{labelConfirm}}\n" +
+    "                </button>\n" +
+    "                {{/labelConfirm}}\n" +
+    "            </div>\n" +
+    "        </div>\n" +
+    "    </div>\n" +
+    "</div>\n" +
+    "";
+>>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.13.js
 
 TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" class=\"overlay overlay-wait\"></div>";
 
@@ -85,7 +135,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 (function( $ )
 {
     // will be overridden by grunt
-    var version = "1.0.12";
+    var version = "1.0.13";
 
     /**
      * Collection of uncompiled registered factories & services.
@@ -834,7 +884,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
             basketItemsList.BasketItemItemID   = parentForm.find( '[name="ArticleID"]' ).val();
             basketItemsList.BasketItemPriceID  = parentForm.find( '[name="SYS_P_ID"]' ).val();
-            basketItemsList.BasketItemQuantity = parentForm.find( '[name="ArticleQuantity"]' ).val();
+            basketItemsList.BasketItemQuantity = parentForm.find( '[name^="ArticleQuantity"]' ).val();
             basketItemsList.BasketItemBranchID = parentForm.find( '[name="source_category"]' ).val();
 
             // look for occurrences of unit combination and take price id of combination, if available.
@@ -905,6 +955,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 if ( (value + '').length <= maxLength && value >= 1 )
                 {
                     $quantityInput.val( value );
+                    $elem.parents( 'form' ).find( '[name^="ArticleQuantity"]' ).val( value );
                 }
             }
         }
@@ -4815,6 +4866,17 @@ PlentyFramework.cssClasses = {
 
             Checkout.getCheckout().CheckoutMethodOfPaymentID = paymentID;
 
+            // checking trusted shop
+            if ( $( "#PlentyWebPaymentMethodTsBuyerProtection" ).length > 0 )
+            {
+                var $ts                                        = $( "#PlentyWebPaymentMethodTsBuyerProtection" );
+                Checkout
+                    .getCheckout()
+                    .TrustedShopsBuyerProtectionItem
+                    .TrustedShopsBuyerProtectionItemIsSelected = $ts.is( ":checked" );
+            }
+
+            // checking for atriga
             if ( !pm.getGlobal( 'Checkout.AtrigaRequireUserConfirmation' ) )
             {
                 Checkout.getCheckout().CheckoutAtrigapaymaxChecked = true;
@@ -5056,17 +5118,31 @@ PlentyFramework.cssClasses = {
                         }
                         else if ( response.data.MethodOfPaymentAdditionalContent != '' )
                         {
+                            /*  This is a PayOne fallback. PayOne has its own confirm button.
+                             To prevent a modal with multiple buttons and different functionality,
+                             we have to check of following MethodOfPaymentIDs and set Our confirm button
+                             only if necessary.
+                             */
+                            var confirmLabel       = pm.translate( "Confirm" );
+                            var paymentIdsToHandle = [3010, 3020, 3080];
+                            if ( paymentIdsToHandle.indexOf( response.data.MethodOfPaymentID ) >= 0 )
+                            {
+                                confirmLabel = '';
+                            }
 
                             Modal.prepare()
                                 .setContent( response.data.MethodOfPaymentAdditionalContent )
                                 .setLabelDismiss( '' )
+                                .setLabelConfirm( confirmLabel )
                                 .onDismiss( function()
                                 {
                                     window.location.assign( form.attr( 'action' ) );
-                                } ).onConfirm( function()
-                            {
-                                window.location.assign( form.attr( 'action' ) );
-                            } ).show();
+                                } )
+                                .onConfirm( function()
+                                {
+                                    window.location.assign( form.attr( 'action' ) );
+                                } )
+                                .show();
 
                         }
                         else
