@@ -2669,7 +2669,8 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 onDismiss      : onDismiss,
                 setTimeout     : setTimeout,
                 show           : show,
-                hide           : hide
+                hide           : hide,
+                setStatic      : setStatic
             };
 
             /**
@@ -2687,6 +2688,22 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             function setClass( cssClass )
             {
                 modal.cssClass = cssClass;
+                return this;
+            }
+
+            /**
+             * Fire this function to make the modal a modal. ;)
+             * Modal only
+             *
+             * @returns {setStatic}
+             */
+            function setStatic( isStatic )
+            {
+                if ( isStatic )
+                {
+                    modal.backdrop = 'static';
+                    modal.keyboard = false;
+                }
                 return this;
             }
 
@@ -2799,6 +2816,10 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                     {
                         modal.uid = '_' + Math.random().toString(36).substr(2, 9);
                         bsModal = $( PlentyFramework.compileTemplate( 'modal/modal.html', modal ) );
+                        if ( bsModal.modal )
+                        {
+                            bsModal.modal( modal );
+                        }
                     }
 
                     $( modal.container ).append( bsModal );
@@ -5086,6 +5107,7 @@ PlentyFramework.cssClasses = {
                                 .setContent( response.data.MethodOfPaymentAdditionalContent )
                                 .setLabelDismiss( '' )
                                 .setLabelConfirm( confirmLabel )
+                                .setStatic( confirmLabel === '' )
                                 .onDismiss( function()
                                 {
                                     window.location.assign( form.attr( 'action' ) );
