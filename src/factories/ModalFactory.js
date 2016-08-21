@@ -57,7 +57,7 @@
         function Modal( selector )
         {
 
-            var modal = this;
+            var modal      = this;
             modal.selector = selector;
                         
             /**
@@ -170,7 +170,8 @@
                 onDismiss      : onDismiss,
                 setTimeout     : setTimeout,
                 show           : show,
-                hide           : hide
+                hide           : hide,
+                setStatic      : setStatic
             };
 
             /**
@@ -188,6 +189,22 @@
             function setClass( cssClass )
             {
                 modal.cssClass = cssClass;
+                return this;
+            }
+
+            /**
+             * Fire this function to make the modal a modal. ;)
+             * Modal only
+             *
+             * @returns {setStatic}
+             */
+            function setStatic( isStatic )
+            {
+                if ( isStatic )
+                {
+                    modal.backdrop = 'static';
+                    modal.keyboard = false;
+                }
                 return this;
             }
 
@@ -286,7 +303,7 @@
              */
             function show()
             {
-                if( !!modal.selector )
+                if ( !!modal.selector )
                 {
                     bsModal = $( modal.selector );
                 }
@@ -300,6 +317,10 @@
                     {
                         modal.uid = '_' + Math.random().toString(36).substr(2, 9);
                         bsModal = $( PlentyFramework.compileTemplate( 'modal/modal.html', modal ) );
+                        if ( bsModal.modal )
+                        {
+                            bsModal.modal( modal );
+                        }
                     }
 
                     $( modal.container ).append( bsModal );
