@@ -2556,7 +2556,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         function Modal( selector )
         {
 
-            var modal = this;
+            var modal      = this;
             modal.selector = selector;
                         
             /**
@@ -2802,7 +2802,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
              */
             function show()
             {
-                if( !!modal.selector )
+                if ( !!modal.selector )
                 {
                     bsModal = $( modal.selector );
                 }
