@@ -3790,6 +3790,7 @@ PlentyFramework.cssClasses = {
             if ( form.validateForm() && pm.getInstance().AddressDoctorService.validateAddress() )
             {
                 var values       = form.getFormValues();
+                var customProp   = $( form ).find( "[id^='plentyCustomerProperty']" );
                 values.LoginType = 2;
 
                 if ( values.checkout
@@ -3808,6 +3809,19 @@ PlentyFramework.cssClasses = {
                                 PropertyValue: tmpProperties[property]
                             } );
                         }
+                    }
+                }
+                else if ( customProp.length > 0 )
+                {
+                    values.CustomerPropertiesList = [];
+                    for ( var i = customProp.length - 1; i >= 0; i-- )
+                    {
+                        var $tmpEl = $( customProp[i] );
+                        values.CustomerPropertiesList.push(
+                            {
+                                PropertyID   : $tmpEl.attr( "data-plenty-property-id" ),
+                                PropertyValue: $tmpEl.val()
+                            } );
                     }
                 }
 
@@ -4652,6 +4666,7 @@ PlentyFramework.cssClasses = {
             var form = $( '[data-plenty-checkout-form="guestRegistration"]' );
 
             var invoiceAddress       = form.getFormValues();
+            var customProp           = $( form ).find( "[id^='plentyCustomerProperty']" );
             invoiceAddress.LoginType = 1;
 
             // add custom properties if necessary.
@@ -4671,6 +4686,19 @@ PlentyFramework.cssClasses = {
                             PropertyValue: tmpProperties[property]
                         } );
                     }
+                }
+            }
+            else if ( customProp.length > 0 )
+            {
+                invoiceAddress.CustomerPropertiesList = [];
+                for ( var i = customProp.length - 1; i >= 0; i-- )
+                {
+                    var $tmpEl = $( customProp[i] );
+                    invoiceAddress.CustomerPropertiesList.push(
+                        {
+                            PropertyID   : $tmpEl.attr( "data-plenty-property-id" ),
+                            PropertyValue: $tmpEl.val()
+                        } );
                 }
             }
 
