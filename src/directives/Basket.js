@@ -59,7 +59,7 @@
         function changeItemQuantity( elem, increment )
         {
             var $elem          = $( elem );
-            var $quantityInput = $elem.parent().find( 'input' );
+            var $quantityInput = $elem.parents('[data-plenty=quantityInputWrapper]').find( '[name^="ArticleQuantity"]' );
             var maxLength      = parseInt( $quantityInput.attr( 'maxlength' ) ) || 5;
             var value          = parseInt( $quantityInput.val() ) + increment;
 

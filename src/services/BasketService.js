@@ -294,7 +294,7 @@
         function editItemAttributes( BasketItemID )
         {
             var modal = $( '[data-plenty-basket-item="' + BasketItemID + '"]' );
-            modal.modal( 'show' );
+            modal.foundation('reveal','open');
             modal.find( '[data-plenty-modal="confirm"]' ).on( 'click', function()
             {
                 var basketItem     = getBasketItem( BasketItemID );
@@ -410,7 +410,7 @@
                             {
                                 // FALLBACK if design not support selector
                                 // [data-plenty-checkout-template="BasketItemsList"]
-                                if ( $( '[data-plenty-checkout-template="BasketItemsList"]' ).length >= 0 )
+                                if ( $( '[data-plenty-checkout-template="BasketItemsList"]' ).length === 0 )
                                 {
                                     API.get( "/rest/checkout/container_checkoutbasketitemslist/" ).done( function( response )
                                     {
@@ -560,13 +560,21 @@
          * Read the coupon code from an &lt;input> element marked with <b>data-plenty-checkout-form="couponCode"</b>
          * and try to add this coupon.
          * @function addCoupon
+         * @param {object} input triggering HTML element (optional)
          * @return {object} <a href="http://api.jquery.com/category/deferred-object/" target="_blank">jQuery deferred
          *     Object</a>
          */
-        function addCoupon()
+        function addCoupon(input)
         {
+            var couponInput = $( '[data-plenty-checkout-form="couponCode"]' );
+            if (typeof input !== 'undefined') {
+              if ($(input).parents('[data-plenty-checkout-template="Coupon"]').length) {
+                couponInput = $(input).parents('[data-plenty-checkout-template="Coupon"]').find('[data-plenty-checkout-form="couponCode"]');
+              }
+            }
+
             var params = {
-                CouponActiveCouponCode: $( '[data-plenty-checkout-form="couponCode"]' ).val()
+                CouponActiveCouponCode: couponInput.val()
             };
 
             return API.post( "/rest/checkout/coupon/", params )

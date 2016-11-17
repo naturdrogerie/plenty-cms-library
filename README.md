@@ -1,12 +1,11 @@
 ![plentymarkets Logo](http://www.plentymarkets.eu/layout/pm/images/logo/plentymarkets-logo.jpg)
 
-# plentymarkets CMS library
+# plentymarkets CMS library - for Foundation 5 based templates
 
 Improve the user experience of your plentymarkets store by simply adding some dynamic functions to your store layout.
 Just add some markup in your templates to bind different functionalities.
 
-This library was built in combination with the [**Callisto Light**](http://standardtemplate.plenty-showcase.de/) store template,
-but can be easily adapted to other templates by using the provided JavaScript API.
+This library is intended for usage with [**Foundation 5**](http://foundation.zurb.com/sites/docs/v/5.5.3/) based templates. For an example, look [**here**](https://www.naturdrogerie.de/).
 
 ## Table of contents
 
@@ -25,10 +24,9 @@ but can be easily adapted to other templates by using the provided JavaScript AP
 
 ### Requirements
 - **jQuery**: The library requires jQuery. By default, jQuery is included in all plentymarkets online stores.
-- **Twitter Bootstrap**: This library provides some UI functions based on [Twitter Bootstrap](http://getbootstrap.com/)
+- **Foundation 5**: This library provides some UI functions based on [Foundation 5](http://foundation.zurb.com/sites/docs/v/5.5.3/)
 - **Modernizr**: Some directives are using [Modernizr](http://modernizr.com/) to detect touch devices.
-- **Owl Carousel 1.x.x**: This [jQuery-Plugin](http://owlgraphic.com/owlcarousel/) is used for slider directives.
-- **Lazy Load Plugin**: A jQuery plugin for loading images dynamically. [Project Page](http://www.appelsiini.net/projects/lazyload)
+- **Slick Slider 1.6**: This [jQuery-Plugin](https://github.com/kenwheeler/slick) is used for slider directives.
 
 
 ### Compiled library
@@ -50,7 +48,7 @@ Use [Grunt](http://gruntjs.com/) to compile your custom build. The following gru
 
 ## Usage
 
-This library is used by the plentymarkets [**Callisto Light**](http://standardtemplate.plenty-showcase.de/) store template.
+This library is used by foundation based plentymarkets templates. [**Example**](https://www.naturdrogerie.de/)
 
 ### Using the library in your store templates
 
@@ -117,8 +115,7 @@ Use `PlentyFramework.getGlobal( variable_name )` to get the value of a registere
 
 ### Customizing and Theming
 
-This library was built in addition to the [**Callisto Light**](http://standardtemplate.plenty-showcase.de/) store template
-and uses [Twitter Bootstrap](http://getbootstrap.com/) for UI functions and styling.
+This library uses [Foundation 5](http://foundation.zurb.com/sites/docs/v/5.5.3/) for UI functions and styling.
 
 The behaviour and layout of all affected elements are defined in `src/partials`. For rendering .html-templates this library
 uses the [Mustache Syntax](https://github.com/janl/mustache.js/).
@@ -172,6 +169,9 @@ Language files should be loaded immediately after loading the the JavaScript lib
 ```
 **Hint:** The path referencing your language file has to be relative to the plentymarketsCMStools.js script path.
 ```
+```
+**Hint:** The path can be identified directly via HTML using "data-plenty-script-path" and setting the absolute path to the folder containing plentymarketsCMStools.
+```
 .
 +-- path
 |   +-- to
@@ -223,4 +223,5 @@ This will be rendered to:
 
 ## Copyright and license
 Copyright 2015 [plentymarkets GmbH](https://www.plentymarkets.com/).
+Copyright 2016 [Die Naturdrogerie](https://www.naturdrogerie.de/).
 Released under [AGPL v3 license](https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE).

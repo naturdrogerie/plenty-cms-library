@@ -59,7 +59,7 @@
 
             var modal      = this;
             modal.selector = selector;
-                        
+
             /**
              * The UID of the modal
              * @attribute uid
@@ -355,6 +355,10 @@
                         hide( true );
                     }
                 } );
+
+                $(document).on('close.fndtn.reveal', bsModal, function () {
+                    modal.onDismiss();
+                });
 
                 PlentyFramework.partials.Modal.show( bsModal );
 
