@@ -62,7 +62,7 @@ TemplateCache["modal/modal.html"] = "<div class=\"reveal-modal medium {{cssClass
    "    <button type=\"button\" class=\"button right\" data-dismiss=\"modal\" data-plenty-modal=\"confirm\">{{labelConfirm}}</button>\n" +
    "    {{/labelConfirm}}\n" +
    "    {{#labelDismiss}}\n" +
-   "    <button type=\"button\" class=\"button info\" data-dismiss=\"modal\">{{labelDismiss}}</button>\n" +
+   "    <button type=\"button\" class=\"button secondary\" data-dismiss=\"modal\">{{labelDismiss}}</button>\n" +
    "    {{/labelDismiss}}\n" +
    "    <a class=\"close-reveal-modal\" aria-label=\"{{#translate}}Close{{/translate}}\">&#215;</a>\n" +
    "</div>\n" +
@@ -875,7 +875,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         function changeItemQuantity( elem, increment )
         {
             var $elem          = $( elem );
-            var $quantityInput = $elem.parent().find( 'input' );
+            var $quantityInput = $elem.parents('[data-plenty=quantityInputWrapper]').find( '[name^="ArticleQuantity"]' );
             var maxLength      = parseInt( $quantityInput.attr( 'maxlength' ) ) || 5;
             var value          = parseInt( $quantityInput.val() ) + increment;
 
@@ -927,6 +927,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
     }, ['BasketService'] );
 }( jQuery, PlentyFramework ));
+
 (function( $, pm )
 {
     pm.directive( 'Checkout', function( CheckoutService )
@@ -2558,7 +2559,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
             var modal      = this;
             modal.selector = selector;
-                        
+
             /**
              * The UID of the modal
              * @attribute uid
@@ -2854,6 +2855,10 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                         hide( true );
                     }
                 } );
+
+                $(document).on('close.fndtn.reveal', bsModal, function () {
+                    modal.onDismiss();
+                });
 
                 PlentyFramework.partials.Modal.show( bsModal );
 
@@ -3790,6 +3795,7 @@ PlentyFramework.cssClasses = {
             if ( form.validateForm() && pm.getInstance().AddressDoctorService.validateAddress() )
             {
                 var values       = form.getFormValues();
+                var customProp   = $( form ).find( "[id^='plentyCustomerProperty']" );
                 values.LoginType = 2;
 
                 if ( values.checkout
@@ -3808,6 +3814,19 @@ PlentyFramework.cssClasses = {
                                 PropertyValue: tmpProperties[property]
                             } );
                         }
+                    }
+                }
+                else if ( customProp.length > 0 )
+                {
+                    values.CustomerPropertiesList = [];
+                    for ( var i = customProp.length - 1; i >= 0; i-- )
+                    {
+                        var $tmpEl = $( customProp[i] );
+                        values.CustomerPropertiesList.push(
+                            {
+                                PropertyID   : $tmpEl.attr( "data-plenty-property-id" ),
+                                PropertyValue: $tmpEl.val()
+                            } );
                     }
                 }
 
@@ -4117,7 +4136,7 @@ PlentyFramework.cssClasses = {
         function editItemAttributes( BasketItemID )
         {
             var modal = $( '[data-plenty-basket-item="' + BasketItemID + '"]' );
-            modal.modal( 'show' );
+            modal.foundation('reveal','open');
             modal.find( '[data-plenty-modal="confirm"]' ).on( 'click', function()
             {
                 var basketItem     = getBasketItem( BasketItemID );
@@ -4233,7 +4252,7 @@ PlentyFramework.cssClasses = {
                             {
                                 // FALLBACK if design not support selector
                                 // [data-plenty-checkout-template="BasketItemsList"]
-                                if ( $( '[data-plenty-checkout-template="BasketItemsList"]' ).length >= 0 )
+                                if ( $( '[data-plenty-checkout-template="BasketItemsList"]' ).length === 0 )
                                 {
                                     API.get( "/rest/checkout/container_checkoutbasketitemslist/" ).done( function( response )
                                     {
@@ -4383,13 +4402,21 @@ PlentyFramework.cssClasses = {
          * Read the coupon code from an &lt;input> element marked with <b>data-plenty-checkout-form="couponCode"</b>
          * and try to add this coupon.
          * @function addCoupon
+         * @param {object} input triggering HTML element (optional)
          * @return {object} <a href="http://api.jquery.com/category/deferred-object/" target="_blank">jQuery deferred
          *     Object</a>
          */
-        function addCoupon()
+        function addCoupon(input)
         {
+            var couponInput = $( '[data-plenty-checkout-form="couponCode"]' );
+            if (typeof input !== 'undefined') {
+              if ($(input).parents('[data-plenty-checkout-template="Coupon"]').length) {
+                couponInput = $(input).parents('[data-plenty-checkout-template="Coupon"]').find('[data-plenty-checkout-form="couponCode"]');
+              }
+            }
+
             var params = {
-                CouponActiveCouponCode: $( '[data-plenty-checkout-form="couponCode"]' ).val()
+                CouponActiveCouponCode: couponInput.val()
             };
 
             return API.post( "/rest/checkout/coupon/", params )
@@ -4561,8 +4588,7 @@ PlentyFramework.cssClasses = {
             var values            = form.getFormValues();
             var shippingAddressID = $( '[name="shippingAddressID"]:checked' ).val();
 
-            // TODO: check if still needed
-            // $('#shippingAdressSelect').foundation('reveal', 'close');
+            form.foundation('reveal', 'close');
 
             if ( shippingAddressID < 0 )
             {
@@ -4652,6 +4678,7 @@ PlentyFramework.cssClasses = {
             var form = $( '[data-plenty-checkout-form="guestRegistration"]' );
 
             var invoiceAddress       = form.getFormValues();
+            var customProp           = $( form ).find( "[id^='plentyCustomerProperty']" );
             invoiceAddress.LoginType = 1;
 
             // add custom properties if necessary.
@@ -4671,6 +4698,19 @@ PlentyFramework.cssClasses = {
                             PropertyValue: tmpProperties[property]
                         } );
                     }
+                }
+            }
+            else if ( customProp.length > 0 )
+            {
+                invoiceAddress.CustomerPropertiesList = [];
+                for ( var i = customProp.length - 1; i >= 0; i-- )
+                {
+                    var $tmpEl = $( customProp[i] );
+                    invoiceAddress.CustomerPropertiesList.push(
+                        {
+                            PropertyID   : $tmpEl.attr( "data-plenty-property-id" ),
+                            PropertyValue: $tmpEl.val()
+                        } );
                 }
             }
 
@@ -5098,7 +5138,7 @@ PlentyFramework.cssClasses = {
                              */
                             var confirmLabel       = pm.translate( "Confirm" );
                             var paymentIdsToHandle = [3010, 3020, 3080];
-                            if ( paymentIdsToHandle.indexOf( response.data.MethodOfPaymentID ) >= 0 )
+                            if ( paymentIdsToHandle.indexOf( response.data.MethodOfPaymentID ) >= 0 && response.data.MethodOfPaymentAdditionalContent.indexOf('button_nextPaymentProviderPayoneCreditCheckButton') > -1 )
                             {
                                 confirmLabel = '';
                             }
@@ -5131,6 +5171,7 @@ PlentyFramework.cssClasses = {
 
     }, ['APIFactory', 'UIFactory', 'CMSFactory', 'CheckoutFactory', 'ModalFactory'] );
 }( jQuery, PlentyFramework ));
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
