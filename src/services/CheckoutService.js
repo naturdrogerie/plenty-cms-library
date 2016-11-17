@@ -116,8 +116,7 @@
             var values            = form.getFormValues();
             var shippingAddressID = $( '[name="shippingAddressID"]:checked' ).val();
 
-            // TODO: check if still needed
-            // $('#shippingAdressSelect').foundation('reveal', 'close');
+            form.foundation('reveal', 'close');
 
             if ( shippingAddressID < 0 )
             {
@@ -667,7 +666,7 @@
                              */
                             var confirmLabel       = pm.translate( "Confirm" );
                             var paymentIdsToHandle = [3010, 3020, 3080];
-                            if ( paymentIdsToHandle.indexOf( response.data.MethodOfPaymentID ) >= 0 )
+                            if ( paymentIdsToHandle.indexOf( response.data.MethodOfPaymentID ) >= 0 && response.data.MethodOfPaymentAdditionalContent.indexOf('button_nextPaymentProviderPayoneCreditCheckButton') > -1 )
                             {
                                 confirmLabel = '';
                             }

@@ -62,7 +62,7 @@ TemplateCache["modal/modal.html"] = "<div class=\"reveal-modal medium {{cssClass
    "    <button type=\"button\" class=\"button right\" data-dismiss=\"modal\" data-plenty-modal=\"confirm\">{{labelConfirm}}</button>\n" +
    "    {{/labelConfirm}}\n" +
    "    {{#labelDismiss}}\n" +
-   "    <button type=\"button\" class=\"button info\" data-dismiss=\"modal\">{{labelDismiss}}</button>\n" +
+   "    <button type=\"button\" class=\"button secondary\" data-dismiss=\"modal\">{{labelDismiss}}</button>\n" +
    "    {{/labelDismiss}}\n" +
    "    <a class=\"close-reveal-modal\" aria-label=\"{{#translate}}Close{{/translate}}\">&#215;</a>\n" +
    "</div>\n" +
