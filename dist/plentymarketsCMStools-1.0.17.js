@@ -12,19 +12,31 @@ TemplateCache["addressSuggestions/addressDoctor.html"] = "<ul class=\"suggestion
 
 TemplateCache["addressSuggestions/postFinder.html"] = "{{#addresses}}\n" +
    "<div class=\"row\">\n" +
+<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.13.js
    "    <div class=\"small-12 columns\">\n" +
+=======
+   "    <div class=\"col-xs-12\">\n" +
+>>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.17.js
    "        <label class=\"address-select\">\n" +
    "            <input type=\"radio\" value=\"{{index}}\" name=\"postfinder\">\n" +
    "		<span class=\"lh-075 address-box-inner\">\n" +
    "\n" +
    "			<span class=\"row\">\n" +
+<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.13.js
    "				<span class=\"medium-6 small-12 columns\">\n" +
+=======
+   "				<span class=\"col-sm-6\">\n" +
+>>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.17.js
    "					<span class=\"block bold\">{{type}} {{number}}</span>\n" +
    "					<span class=\"block\">{{street}} {{houseNo}}</span>\n" +
    "					<span class=\"block\">{{zip}} {{city}}</span>\n" +
    "				</span>\n" +
    "\n" +
+<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.13.js
    "				<span class=\"medium-6 small-12 columns\">\n" +
+=======
+   "				<span class=\"col-sm-6 muted\">\n" +
+>>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.17.js
    "					<span class=\"block bold\"><span>{{distance}} {{dimension}}</span></span>\n" +
    "					<span class=\"block\">{{remark}}</span>\n" +
    "				</span>\n" +
@@ -44,6 +56,7 @@ TemplateCache["error/errorMessage.html"] = "<div class=\"plentyErrorBoxContent\"
    "</div>\n" +
    "";
 
+<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.13.js
 TemplateCache["error/errorPopup.html"] = "<div data-alert class=\"alert-box alert radius plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
    "  <div class=\"plentyErrorBoxInner\">\n" +
    "  </div>\n" +
@@ -65,6 +78,48 @@ TemplateCache["modal/modal.html"] = "<div class=\"reveal-modal medium {{cssClass
    "    <button type=\"button\" class=\"button secondary\" data-dismiss=\"modal\">{{labelDismiss}}</button>\n" +
    "    {{/labelDismiss}}\n" +
    "    <a class=\"close-reveal-modal\" aria-label=\"{{#translate}}Close{{/translate}}\">&#215;</a>\n" +
+=======
+TemplateCache["error/errorPopup.html"] = "<div class=\"plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
+   "    <button class=\"close\" type=\"button\"><span aria-hidden=\"true\">×</span>\n" +
+   "        <span class=\"sr-only\">{{#translate}}Close{{/translate}}</span>\n" +
+   "    </button>\n" +
+   "    <div class=\"plentyErrorBoxInner\">\n" +
+   "    </div>\n" +
+   "</div>\n" +
+   "";
+
+TemplateCache["modal/modal.html"] = "<div class=\"modal fade {{cssClass}}\">\n" +
+   "    <div class=\"modal-dialog\">\n" +
+   "        <div class=\"modal-content\">\n" +
+   "\n" +
+   "            {{#title}}\n" +
+   "            <div class=\"modal-header\">\n" +
+   "                <button class=\"close\" type=\"button\" data-dismiss=\"modal\" aria-label=\"{{#translate}}Close{{/translate}}\">\n" +
+   "                    <span aria-hidden=\"true\">&times;</span>\n" +
+   "                </button>\n" +
+   "                <h4 class=\"modal-title\">{{{title}}}</h4>\n" +
+   "            </div>\n" +
+   "            {{/title}}\n" +
+   "\n" +
+   "            <div class=\"modal-body\">{{{content}}}</div>\n" +
+   "\n" +
+   "            <div class=\"modal-footer\">\n" +
+   "\n" +
+   "                {{#labelDismiss}}\n" +
+   "                <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">\n" +
+   "                    <span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>{{labelDismiss}}\n" +
+   "                </button>\n" +
+   "                {{/labelDismiss}}\n" +
+   "\n" +
+   "                {{#labelConfirm}}\n" +
+   "                <button type=\"button\" class=\"btn btn-primary\" data-plenty-modal=\"confirm\">\n" +
+   "                    <span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span>{{labelConfirm}}\n" +
+   "                </button>\n" +
+   "                {{/labelConfirm}}\n" +
+   "            </div>\n" +
+   "        </div>\n" +
+   "    </div>\n" +
+>>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.17.js
    "</div>\n" +
    "";
 
@@ -87,7 +142,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 (function( $ )
 {
     // will be overridden by grunt
-    var version = "1.0.13";
+    var version = "1.0.17";
 
     /**
      * Collection of uncompiled registered factories & services.
@@ -695,6 +750,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             }
         }
 
+<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.13.js
         // opportunity to insert a script path manually through defining
         // data-plenty-script-path on a DOM element (i.e. a script tag)
         if ($('[data-plenty-script-path]').length > 0) {
@@ -708,6 +764,14 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 	PlentyFramework.scriptPath = path[1];
                 	break;
             	}
+=======
+        var scripts = document.getElementsByTagName( 'SCRIPT' );
+        for( var i = scripts.length - 1; i >= 0; i-- ) {
+            var path = scripts[i].src.match( /(.*)\/(.*)\.js(\?\S*)?$/ );
+            if( !!path ) {
+                PlentyFramework.scriptPath = path[1];
+                break;
+>>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.17.js
             }
         }
 
@@ -789,6 +853,9 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
 
 }( jQuery ));
 
+
+
+
 /**
  * Licensed under AGPL v3
  * (https://github.com/plentymarkets/plenty-cms-library/blob/master/LICENSE)
@@ -822,7 +889,8 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
         return {
             addBasketItem     : addBasketItem,
             changeItemQuantity: changeItemQuantity,
-            setItemQuantity   : setItemQuantity
+            setItemQuantity   : setItemQuantity,
+            updateItemQuantity : updateItemQuantity
         };
 
         function addBasketItem( elem )
@@ -879,37 +947,17 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             var maxLength      = parseInt( $quantityInput.attr( 'maxlength' ) ) || 5;
             var value          = parseInt( $quantityInput.val() ) + increment;
 
-            var isBasketView = $elem.parents( '[data-basket-item-id]' ).length > 0;
+            setItemQuantityToNewValue( $elem, $quantityInput, maxLength, value)
+        }
 
-            if ( isBasketView )
-            {
-                if ( (value + '').length <= maxLength && value >= 0 )
-                {
-                    $quantityInput.val( value );
-                }
+        function updateItemQuantity( elem )
+        {
+            var $elem = $( elem );
+            var $quantityInput = $elem;
+            var maxLength      = parseInt( $quantityInput.attr( 'maxlength' ) ) || 5;
+            var value          = convertToFloat( $quantityInput.val() );
 
-                var timeout = $elem.data( 'timeout' );
-
-                if ( !!timeout )
-                {
-                    window.clearTimeout( timeout );
-                }
-
-                timeout = window.setTimeout( function()
-                {
-                    $quantityInput.trigger( 'change' );
-                }, 1000 );
-
-                $elem.data( 'timeout', timeout );
-            }
-            else
-            {
-                if ( (value + '').length <= maxLength && value >= 1 )
-                {
-                    $quantityInput.val( value );
-                    $elem.parents( 'form' ).find( '[name^="ArticleQuantity"]' ).val( value );
-                }
-            }
+            setItemQuantityToNewValue($elem, $quantityInput, maxLength, value);
         }
 
         function setItemQuantity( basketItemID, input )
@@ -923,6 +971,51 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 var basketItem = BasketService.getItem( basketItemID );
                 $( input ).val( basketItem.BasketItemQuantity );
             } );
+        }
+
+        function setItemQuantityToNewValue(element, quantityInput, maxLength, value)
+        {
+            var isBasketView = element.parents( '[data-basket-item-id]' ).length > 0;
+
+            if ( isBasketView )
+            {
+                if ( (value + '').length <= maxLength && value >= 0 )
+                {
+                    quantityInput.val( value );
+                }
+
+                var timeout = element.data( 'timeout' );
+
+                if ( !!timeout )
+                {
+                    window.clearTimeout( timeout );
+                }
+
+                timeout = window.setTimeout( function()
+                {
+                    quantityInput.trigger( 'change' );
+                }, 1000 );
+
+                element.data( 'timeout', timeout );
+            }
+            else
+            {
+                if ( (value + '').length <= maxLength && value >= 1 )
+                {
+                    quantityInput.val( value );
+                    element.parents( 'form' ).find( '[name^="ArticleQuantity"]' ).val( value );
+                }
+            }
+        }
+
+
+        function convertToFloat(n) {
+            n = n.replace(',', '.');
+            if(!isNaN(parseFloat(n)) && isFinite(n))
+            {
+              return parseFloat(n);
+            }
+            return 1;
         }
 
     }, ['BasketService'] );
@@ -1287,7 +1380,7 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                         }
                     }
 
-                    $( window ).on( 'sizeChange', resetTabs );
+                    //$( window ).on( 'sizeChange', resetTabs );
                 }
 
                 activeTab = tabs[tabID];
@@ -3895,43 +3988,51 @@ PlentyFramework.cssClasses = {
 
             if ( !!article )
             {
-
-                API.get( '/rest/checkout/container_' + 'CheckoutOrderParamsList'.toLowerCase() + '/',
-                    {
-                        itemID  : article[0].BasketItemItemID,
-                        quantity: article[0].BasketItemQuantity
-                    }, false, true ).done( function( resp )
+                // checking for order params!
+                if ( $( "#BasketItemOrderParamsContainer_0" ).find( "[name^='ItemOrderParams']" ).length > 0 )
                 {
-                    // checking for order params!
-                    if ( resp.data[0].indexOf( "form-group" ) > 0 )
+                    // save order params
+                    addArticle( saveOrderParams( article ) );
+                }
+                else
+                {
+                    API.get( '/rest/checkout/container_' + 'CheckoutOrderParamsList'.toLowerCase() + '/',
+                        {
+                            itemID  : article[0].BasketItemItemID,
+                            quantity: article[0].BasketItemQuantity
+                        }, false, true ).done( function( resp )
                     {
-                        Modal.prepare()
-                            .setContent( resp.data[0] )
-                            .setTitle( pm.translate( "Select order parameters" ) )
-                            .setLabelConfirm( pm.translate( "Save" ) )
-                            .onConfirm( function()
-                            {
-                                // validate form
-                                if ( $( '[data-plenty-checkout-form="OrderParamsForm"]' ).validateForm() )
+                        // checking for order params!
+                        if ( resp.data[0].indexOf( "form-group" ) > 0 )
+                        {
+                            Modal.prepare()
+                                .setContent( resp.data[0] )
+                                .setTitle( pm.translate( "Select order parameters" ) )
+                                .setLabelConfirm( pm.translate( "Save" ) )
+                                .onConfirm( function()
                                 {
-                                    // save order params
-                                    addArticle( saveOrderParams( article ) );
+                                    // validate form
+                                    if ( $( '[data-plenty-checkout-form="OrderParamsForm"]' ).validateForm() )
+                                    {
+                                        // save order params
+                                        addArticle( saveOrderParams( article ) );
 
-                                    // close modal after saving order params
-                                    return true;
-                                }
-                                else
-                                {
-                                    return false;
-                                }
-                            } )
-                            .show();
-                    }
-                    else
-                    {
-                        addArticle( article );
-                    }
-                } );
+                                        // close modal after saving order params
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        return false;
+                                    }
+                                } )
+                                .show();
+                        }
+                        else
+                        {
+                            addArticle( article );
+                        }
+                    } );
+                }
             }
         }
 
@@ -3960,7 +4061,18 @@ PlentyFramework.cssClasses = {
             //Values
             orderParamsForm.find( '[name^="ParamValue"]' ).each( function()
             {
-                $self    = $( this );
+                getValues( "ParamValue", this );
+            } );
+
+            //Values
+            $( '[id^="BasketItemOrderParamsContainer"]' ).find( '[name^="ItemOrderParams"]' ).each( function()
+            {
+                getValues( "ItemOrderParams", this );
+            } );
+
+            function getValues( type, el )
+            {
+                $self    = $( el );
                 attrType = $self.attr( 'type' );
 
                 if ( ((attrType == 'checkbox' && $self.is( ':checked' )) ||
@@ -3968,7 +4080,14 @@ PlentyFramework.cssClasses = {
                     (attrType != 'radio' && attrType != 'checkbox')) && attrType != 'file' && attrType != 'hidden' )
                 {
 
-                    var match         = $self[0].name.match( /^ParamValue\[(\d+)]\[(\d+)]$/ );
+                    if ( type === "ParamValue" )
+                    {
+                        var match = $self[0].name.match( /^ParamValue\[(\d+)]\[(\d+)]$/ );
+                    }
+                    if ( type === "ItemOrderParams" )
+                    {
+                        var match = $self[0].name.match( /^ItemOrderParams\[(\d+)]\[(\w+)]$/ );
+                    }
                     articleWithParams = addOrderParamValue( articleWithParams, match[1], match[2], $self.val() );
 
                 }
@@ -3980,12 +4099,21 @@ PlentyFramework.cssClasses = {
                     }
                     else
                     {
-                        var match         = $self[0].name.match( /^ParamValueFile\[(\d+)]\[(\d+)]$/ );
-                        var paramValue    = $( 'input[type="hidden"][name="ParamValue[' + match[1] + '][' + match[2] + ']"]' ).val();
+                        if ( type === "ParamValue" )
+                        {
+                            var match      = $self[0].name.match( /^ParamValueFile\[(\d+)]\[(\d+)]$/ );
+                            var paramValue = $( 'input[type="hidden"][name="ParamValue[' + match[1] + '][' + match[2] + ']"]' ).val();
+                        }
+                        if ( type === "ItemOrderParams" )
+                        {
+                            var match      = $self[0].name.match( /^ItemOrderParamsFile\[(\d+)]\[(\d+)]$/ );
+                            var paramValue = $( 'input[type="hidden"][name="ItemOrderParamsFile[' + match[1] + '][' + match[2] + ']"]' ).val();
+                        }
+
                         articleWithParams = addOrderParamValue( articleWithParams, match[1], match[2], paramValue );
                     }
                 }
-            } );
+            }
 
             return articleWithParams;
         }
@@ -4092,6 +4220,10 @@ PlentyFramework.cssClasses = {
             }
 
             var match = $input[0].name.match( /^ParamValueFile\[(\d+)]\[(\d+)]$/ );
+            if ( !match )
+            {
+                match = $input[0].name.match( /^ItemOrderParamsFile\[(\d+)]\[(\d+)]$/ );
+            }
 
             return addOrderParamValue( articleWithParams, match[1], match[2], orderParamUploadFiles[key][0]['name'] );
         }
@@ -4345,7 +4477,7 @@ PlentyFramework.cssClasses = {
             {
                 params[basketItemIndex].BasketItemQuantity = parseInt( BasketItemQuantity );
 
-                API.post( "/rest/checkout/basketitemslist/", params )
+                return API.post( "/rest/checkout/basketitemslist/", params )
                     .done( function()
                     {
                         Checkout.setCheckout().done( function()
@@ -4354,6 +4486,11 @@ PlentyFramework.cssClasses = {
                             refreshBasketPreview();
                             deferred.resolve();
                         } );
+                    } ).fail( function(response)
+                    {
+                      Checkout.reloadCatContent( pm.getGlobal( 'basketCatID' ) );
+                      refreshBasketPreview();
+                      deferred.resolve();
                     } );
             }
 
@@ -4391,11 +4528,26 @@ PlentyFramework.cssClasses = {
             var itemQuantityTotal = 0;
             $.each( Checkout.getCheckout().BasketItemsList, function( i, basketItem )
             {
-                itemQuantityTotal += basketItem.BasketItemQuantity;
+                itemQuantityTotal += convertToFloat( basketItem.BasketItemQuantity );
             } );
 
+            $( '[data-plenty-basket-preview="basketItemCount"]').text( Checkout.getCheckout().BasketItemsList.length );
             $( '[data-plenty-basket-preview="itemQuantityTotal"]' ).text( itemQuantityTotal );
             $( '[data-plenty-basket-preview="totalsItemSum"]' ).text( Checkout.getCheckout().Totals.TotalsItemSum );
+        }
+
+        function convertToFloat(n) {
+
+            if ( typeof n === "number" )
+            {
+                return n;
+            }
+            n = n.replace(',', '.');
+            if(!isNaN(parseFloat(n)) && isFinite(n))
+            {
+                return parseFloat(n);
+            }
+            return 0;
         }
 
         /**
