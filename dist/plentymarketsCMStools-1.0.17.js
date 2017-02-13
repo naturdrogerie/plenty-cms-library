@@ -12,31 +12,19 @@ TemplateCache["addressSuggestions/addressDoctor.html"] = "<ul class=\"suggestion
 
 TemplateCache["addressSuggestions/postFinder.html"] = "{{#addresses}}\n" +
    "<div class=\"row\">\n" +
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.13.js
    "    <div class=\"small-12 columns\">\n" +
-=======
-   "    <div class=\"col-xs-12\">\n" +
->>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.17.js
    "        <label class=\"address-select\">\n" +
    "            <input type=\"radio\" value=\"{{index}}\" name=\"postfinder\">\n" +
    "		<span class=\"lh-075 address-box-inner\">\n" +
    "\n" +
    "			<span class=\"row\">\n" +
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.13.js
    "				<span class=\"medium-6 small-12 columns\">\n" +
-=======
-   "				<span class=\"col-sm-6\">\n" +
->>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.17.js
    "					<span class=\"block bold\">{{type}} {{number}}</span>\n" +
    "					<span class=\"block\">{{street}} {{houseNo}}</span>\n" +
    "					<span class=\"block\">{{zip}} {{city}}</span>\n" +
    "				</span>\n" +
    "\n" +
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.13.js
    "				<span class=\"medium-6 small-12 columns\">\n" +
-=======
-   "				<span class=\"col-sm-6 muted\">\n" +
->>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.17.js
    "					<span class=\"block bold\"><span>{{distance}} {{dimension}}</span></span>\n" +
    "					<span class=\"block\">{{remark}}</span>\n" +
    "				</span>\n" +
@@ -56,7 +44,6 @@ TemplateCache["error/errorMessage.html"] = "<div class=\"plentyErrorBoxContent\"
    "</div>\n" +
    "";
 
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.13.js
 TemplateCache["error/errorPopup.html"] = "<div data-alert class=\"alert-box alert radius plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
    "  <div class=\"plentyErrorBoxInner\">\n" +
    "  </div>\n" +
@@ -78,48 +65,6 @@ TemplateCache["modal/modal.html"] = "<div class=\"reveal-modal medium {{cssClass
    "    <button type=\"button\" class=\"button secondary\" data-dismiss=\"modal\">{{labelDismiss}}</button>\n" +
    "    {{/labelDismiss}}\n" +
    "    <a class=\"close-reveal-modal\" aria-label=\"{{#translate}}Close{{/translate}}\">&#215;</a>\n" +
-=======
-TemplateCache["error/errorPopup.html"] = "<div class=\"plentyErrorBox\" id=\"CheckoutErrorPane\">\n" +
-   "    <button class=\"close\" type=\"button\"><span aria-hidden=\"true\">×</span>\n" +
-   "        <span class=\"sr-only\">{{#translate}}Close{{/translate}}</span>\n" +
-   "    </button>\n" +
-   "    <div class=\"plentyErrorBoxInner\">\n" +
-   "    </div>\n" +
-   "</div>\n" +
-   "";
-
-TemplateCache["modal/modal.html"] = "<div class=\"modal fade {{cssClass}}\">\n" +
-   "    <div class=\"modal-dialog\">\n" +
-   "        <div class=\"modal-content\">\n" +
-   "\n" +
-   "            {{#title}}\n" +
-   "            <div class=\"modal-header\">\n" +
-   "                <button class=\"close\" type=\"button\" data-dismiss=\"modal\" aria-label=\"{{#translate}}Close{{/translate}}\">\n" +
-   "                    <span aria-hidden=\"true\">&times;</span>\n" +
-   "                </button>\n" +
-   "                <h4 class=\"modal-title\">{{{title}}}</h4>\n" +
-   "            </div>\n" +
-   "            {{/title}}\n" +
-   "\n" +
-   "            <div class=\"modal-body\">{{{content}}}</div>\n" +
-   "\n" +
-   "            <div class=\"modal-footer\">\n" +
-   "\n" +
-   "                {{#labelDismiss}}\n" +
-   "                <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">\n" +
-   "                    <span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>{{labelDismiss}}\n" +
-   "                </button>\n" +
-   "                {{/labelDismiss}}\n" +
-   "\n" +
-   "                {{#labelConfirm}}\n" +
-   "                <button type=\"button\" class=\"btn btn-primary\" data-plenty-modal=\"confirm\">\n" +
-   "                    <span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span>{{labelConfirm}}\n" +
-   "                </button>\n" +
-   "                {{/labelConfirm}}\n" +
-   "            </div>\n" +
-   "        </div>\n" +
-   "    </div>\n" +
->>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.17.js
    "</div>\n" +
    "";
 
@@ -750,7 +695,6 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
             }
         }
 
-<<<<<<< HEAD:dist/plentymarketsCMStools-1.0.13.js
         // opportunity to insert a script path manually through defining
         // data-plenty-script-path on a DOM element (i.e. a script tag)
         if ($('[data-plenty-script-path]').length > 0) {
@@ -764,14 +708,6 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
                 	PlentyFramework.scriptPath = path[1];
                 	break;
             	}
-=======
-        var scripts = document.getElementsByTagName( 'SCRIPT' );
-        for( var i = scripts.length - 1; i >= 0; i-- ) {
-            var path = scripts[i].src.match( /(.*)\/(.*)\.js(\?\S*)?$/ );
-            if( !!path ) {
-                PlentyFramework.scriptPath = path[1];
-                break;
->>>>>>> plentymarkets/master:dist/plentymarketsCMStools-1.0.17.js
             }
         }
 
@@ -852,9 +788,6 @@ TemplateCache["waitscreen/waitscreen.html"] = "<div id=\"PlentyWaitScreen\" clas
     }
 
 }( jQuery ));
-
-
-
 
 /**
  * Licensed under AGPL v3
