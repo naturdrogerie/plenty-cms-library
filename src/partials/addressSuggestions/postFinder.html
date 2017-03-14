@@ -1,26 +1,24 @@
+<div class="scrollPane">
 {{#addresses}}
-<div class="row">
-    <div class="small-12 columns">
-        <label class="address-select">
-            <input type="radio" value="{{index}}" name="postfinder">
-		<span class="lh-075 address-box-inner">
-
-			<span class="row">
+<label>
+  <span class="row collapse">
+    <span class="columns small-1">
+      <input type="radio" value="{{index}}" name="postfinder">
+    </span>
+    <span class="columns small-11">
+      <span class="row uncollapse">
 				<span class="medium-6 small-12 columns">
-					<span class="block bold">{{type}} {{number}}</span>
-					<span class="block">{{street}} {{houseNo}}</span>
-					<span class="block">{{zip}} {{city}}</span>
+					<strong>{{type}} {{number}}</strong><br>
+					{{street}} {{houseNo}}<br>
+					{{zip}} {{city}}<br><br>
 				</span>
-
 				<span class="medium-6 small-12 columns">
-					<span class="block bold"><span>{{distance}} {{dimension}}</span></span>
-					<span class="block">{{remark}}</span>
+					<strong>{{distance}} {{dimension}}</strong><br>
+					{{remark}}<br><br>
 				</span>
-
 			</span>
-
-		</span>
-        </label>
-    </div>
-</div>
+    </span>
+  </span>
+</label>
 {{/addresses}}
+</div>

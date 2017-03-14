@@ -184,13 +184,6 @@
                 {
                     Checkout.reloadContainer( 'CustomerShippingAddress' );
                 }
-                $( '#shippingAdressSelect' ).modal( 'hide' );
-
-                // don't hit me. Ugly hack: this is to force quit/remove everything from modal.
-                if ( $( ".modal-backdrop" ) )
-                {
-                    $( ".modal-backdrop" ).remove();
-                }
             } );
         }
 

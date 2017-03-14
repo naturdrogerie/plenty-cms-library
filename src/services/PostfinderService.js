@@ -128,6 +128,7 @@
 
                                 $( shippingFields.PostfinderItemCity ).val( result[packstationID].PostfinderItemCity );
                                 $( shippingFields.PostfinderItemZIP ).val( result[packstationID].PostfinderItemZIP );
+                                $( '#shippingAdressSelect' ).foundation('reveal','open');
                                 return true;
                             } )
                             .show()
