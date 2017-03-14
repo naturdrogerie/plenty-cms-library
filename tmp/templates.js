@@ -10,32 +10,30 @@ TemplateCache["addressSuggestions/addressDoctor.html"] = "<ul class=\"suggestion
    "    {{/values}}\n" +
    "</ul>";
 
-TemplateCache["addressSuggestions/postFinder.html"] = "{{#addresses}}\n" +
-   "<div class=\"row\">\n" +
-   "    <div class=\"small-12 columns\">\n" +
-   "        <label class=\"address-select\">\n" +
-   "            <input type=\"radio\" value=\"{{index}}\" name=\"postfinder\">\n" +
-   "		<span class=\"lh-075 address-box-inner\">\n" +
-   "\n" +
-   "			<span class=\"row\">\n" +
+TemplateCache["addressSuggestions/postFinder.html"] = "<div class=\"scrollPane\">\n" +
+   "{{#addresses}}\n" +
+   "<label>\n" +
+   "  <span class=\"row collapse\">\n" +
+   "    <span class=\"columns small-1\">\n" +
+   "      <input type=\"radio\" value=\"{{index}}\" name=\"postfinder\">\n" +
+   "    </span>\n" +
+   "    <span class=\"columns small-11\">\n" +
+   "      <span class=\"row uncollapse\">\n" +
    "				<span class=\"medium-6 small-12 columns\">\n" +
-   "					<span class=\"block bold\">{{type}} {{number}}</span>\n" +
-   "					<span class=\"block\">{{street}} {{houseNo}}</span>\n" +
-   "					<span class=\"block\">{{zip}} {{city}}</span>\n" +
+   "					<strong>{{type}} {{number}}</strong><br>\n" +
+   "					{{street}} {{houseNo}}<br>\n" +
+   "					{{zip}} {{city}}<br><br>\n" +
    "				</span>\n" +
-   "\n" +
    "				<span class=\"medium-6 small-12 columns\">\n" +
-   "					<span class=\"block bold\"><span>{{distance}} {{dimension}}</span></span>\n" +
-   "					<span class=\"block\">{{remark}}</span>\n" +
+   "					<strong>{{distance}} {{dimension}}</strong><br>\n" +
+   "					{{remark}}<br><br>\n" +
    "				</span>\n" +
-   "\n" +
    "			</span>\n" +
-   "\n" +
-   "		</span>\n" +
-   "        </label>\n" +
-   "    </div>\n" +
-   "</div>\n" +
+   "    </span>\n" +
+   "  </span>\n" +
+   "</label>\n" +
    "{{/addresses}}\n" +
+   "</div>\n" +
    "";
 
 TemplateCache["error/errorMessage.html"] = "<div class=\"plentyErrorBoxContent\" data-plenty-error-code=\"{{code}}\">\n" +
